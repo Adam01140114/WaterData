@@ -230,6 +230,7 @@ tr:hover {
 .delete-btn {
     background: #e74c3c;
     color: white;
+    width: 60px;
 }
 
 .delete-btn:hover {
