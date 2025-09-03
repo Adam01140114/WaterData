@@ -218,12 +218,13 @@ tr:hover {
 }
 
 .edit-btn {
-    background: #f39c12;
+    background: #3498db;
     color: white;
+    width: 60px;
 }
 
 .edit-btn:hover {
-    background: #e67e22;
+    background: #2980b9;
 }
 
 .delete-btn {
