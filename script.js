@@ -242,10 +242,7 @@ class WaterLevelLogger {
             }
         });
 
-        // Add some initial data if none exists to show the chart
-        if (this.data.length === 0) {
-            this.addSampleData();
-        }
+        // Chart is ready, no automatic sample data
         
         this.updateChart();
     }
