@@ -221,6 +221,7 @@ tr:hover {
     background: #3498db;
     color: white;
     width: 60px;
+    margin-right: 8px;
 }
 
 .edit-btn:hover {
