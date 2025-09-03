@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Water Level Logger</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌊 Water Level Logger</h1>
+            <p>Monitor and track water levels at your sites</p>
+        </header>
+
+        <main>
+            <!-- Data Entry Section -->
+            <section class="data-entry">
+                <h2>Log Water Level</h2>
+                <form id="waterLevelForm">
+                    <div class="form-group">
+                        <label for="siteSelect">Water Site:</label>
+                        <select id="siteSelect" required>
+                            <option value="">Select a site</option>
+                            <option value="Site A">Site A</option>
+                            <option value="Site B">Site B</option>
+                            <option value="Site C">Site C</option>
+                            <option value="Site D">Site D</option>
+                            <option value="Site E">Site E</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="waterLevel">Water Level (cm):</label>
+                        <input type="number" id="waterLevel" step="0.1" min="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timestamp">Date & Time:</label>
+                        <input type="datetime-local" id="timestamp" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">Notes (optional):</label>
+                        <textarea id="notes" rows="3" placeholder="Any additional observations..."></textarea>
+                    </div>
+                    
+                    <button type="submit" class="btn-primary">Log Water Level</button>
+                </form>
+            </section>
+
+            <!-- Data Visualization Section -->
+            <section class="visualization">
+                <h2>Water Level Trends</h2>
+                
+                <div class="chart-controls">
+                    <div class="form-group">
+                        <label for="chartSiteSelect">Select Site for Chart:</label>
+                        <select id="chartSiteSelect">
+                            <option value="all">All Sites</option>
+                            <option value="Site A">Site A</option>
+                            <option value="Site B">Site B</option>
+                            <option value="Site C">Site C</option>
+                            <option value="Site D">Site D</option>
+                            <option value="Site E">Site E</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="timeRange">Time Range:</label>
+                        <select id="timeRange">
+                            <option value="90">Last 3 months</option>
+                            <option value="180">Last 6 months</option>
+                            <option value="270">Last 9 months</option>
+                            <option value="all">All time</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="waterLevelChart"></canvas>
+                    <div id="noDataMessage" class="no-data-message" style="display: none;">
+                        <p>No data available to display. Start logging water levels to see trends!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Table Section -->
+            <section class="data-table">
+                <h2>Recent Entries</h2>
+                <div class="table-controls">
+                    <button id="exportBtn" class="btn-secondary">Export Data</button>
+                    <button id="clearDataBtn" class="btn-danger">Clear All Data</button>
+                </div>
+                <div class="table-container">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>Site</th>
+                                <th>Water Level (cm)</th>
+                                <th>Date & Time</th>
+                                <th>Notes</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
