@@ -7,12 +7,38 @@
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyACh8hp2kL4P0xBPkwkvpLA0zNAqtw5IQc",
+            authDomain: "invoice-4f2b4.firebaseapp.com",
+            projectId: "invoice-4f2b4",
+            storageBucket: "invoice-4f2b4.firebasestorage.app",
+            messagingSenderId: "1028270499799",
+            appId: "1:1028270499799:web:31401d335232bb21bc4d92",
+            measurementId: "G-Z1HX6QN3DG"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        
+        // Make Firebase available globally
+        window.firebaseApp = app;
+        window.db = db;
+        window.firebaseMethods = {
+            addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, collection
+        };
+    </script>
 </head>
 <body>
     <div class="container">
         <header>
             <h1>🌊 Water Level Logger</h1>
-            <p>Monitor and track water levels at your sites</p>
+            <p>Monitor and track your water levels</p>
         </header>
 
         <main>
@@ -82,7 +108,7 @@
                 <div class="chart-container">
                     <canvas id="waterLevelChart"></canvas>
                     <div id="noDataMessage" class="no-data-message" style="display: none;">
-                        <p>No data available to display. Start logging water levels to see trends!</p>
+                        <p>No data available to display. </p>
                     </div>
                 </div>
             </section>

@@ -1,14 +1,18 @@
 // Water Level Logger Application
 class WaterLevelLogger {
     constructor() {
-        this.data = this.loadData();
+        this.data = [];
         this.chart = null;
         this.init();
     }
 
-    init() {
+    async init() {
         this.setupEventListeners();
         this.setCurrentDateTime();
+        
+        // Load data from Firebase
+        this.data = await this.loadData();
+        
         this.renderDataTable();
         this.createChart();
         this.showMessage('Welcome to Water Level Logger! Start by logging your first water level reading.', 'success');
@@ -86,11 +90,26 @@ class WaterLevelLogger {
         }
     }
 
-    addWaterLevel(data) {
-        this.data.push(data);
-        this.saveData();
-        this.renderDataTable();
-        this.updateChart();
+    async addWaterLevel(data) {
+        try {
+            if (window.db && window.firebaseMethods) {
+                const { collection, addDoc } = window.firebaseMethods;
+                const docRef = await addDoc(collection(window.db, 'waterLevels'), data);
+                data.id = docRef.id; // Use Firebase document ID
+                this.data.push(data);
+            } else {
+                // Fallback to localStorage
+                data.id = Date.now();
+                this.data.push(data);
+                localStorage.setItem('waterLevelData', JSON.stringify(this.data));
+            }
+            
+            this.renderDataTable();
+            this.updateChart();
+        } catch (error) {
+            console.error('Error adding water level:', error);
+            this.showMessage('Error saving water level. Please try again.', 'error');
+        }
     }
 
     checkMonthlyDuplicate(site, timestamp) {
@@ -169,13 +188,26 @@ class WaterLevelLogger {
         submitBtn.dataset.editing = 'true';
     }
 
-    deleteEntry(id) {
+    async deleteEntry(id) {
         if (confirm('Are you sure you want to delete this entry?')) {
-            this.data = this.data.filter(item => item.id !== id);
-            this.saveData();
-            this.renderDataTable();
-            this.updateChart();
-            this.showMessage('Entry deleted successfully.', 'success');
+            try {
+                if (window.db && window.firebaseMethods) {
+                    const { doc, deleteDoc } = window.firebaseMethods;
+                    await deleteDoc(doc(window.db, 'waterLevels', id));
+                }
+                
+                this.data = this.data.filter(item => item.id !== id);
+                
+                // Update localStorage as backup
+                localStorage.setItem('waterLevelData', JSON.stringify(this.data));
+                
+                this.renderDataTable();
+                this.updateChart();
+                this.showMessage('Entry deleted successfully.', 'success');
+            } catch (error) {
+                console.error('Error deleting entry:', error);
+                this.showMessage('Error deleting entry. Please try again.', 'error');
+            }
         }
     }
 
@@ -391,13 +423,32 @@ class WaterLevelLogger {
         return csvRows.join('\n');
     }
 
-    clearAllData() {
+    async clearAllData() {
         if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-            this.data = [];
-            this.saveData();
-            this.renderDataTable();
-            this.updateChart();
-            this.showMessage('All data has been cleared.', 'success');
+            try {
+                if (window.db && window.firebaseMethods) {
+                    const { collection, getDocs, doc, deleteDoc } = window.firebaseMethods;
+                    const querySnapshot = await getDocs(collection(window.db, 'waterLevels'));
+                    
+                    // Delete all documents
+                    const deletePromises = [];
+                    querySnapshot.forEach((docSnapshot) => {
+                        deletePromises.push(deleteDoc(doc(window.db, 'waterLevels', docSnapshot.id)));
+                    });
+                    
+                    await Promise.all(deletePromises);
+                }
+                
+                this.data = [];
+                localStorage.removeItem('waterLevelData');
+                
+                this.renderDataTable();
+                this.updateChart();
+                this.showMessage('All data has been cleared.', 'success');
+            } catch (error) {
+                console.error('Error clearing data:', error);
+                this.showMessage('Error clearing data. Please try again.', 'error');
+            }
         }
     }
 
@@ -424,13 +475,48 @@ class WaterLevelLogger {
         }, 5000);
     }
 
-    loadData() {
-        const saved = localStorage.getItem('waterLevelData');
-        return saved ? JSON.parse(saved) : [];
+    async loadData() {
+        try {
+            if (!window.db) {
+                console.log('Firebase not ready, using localStorage fallback');
+                const saved = localStorage.getItem('waterLevelData');
+                return saved ? JSON.parse(saved) : [];
+            }
+
+            const { collection, getDocs } = window.firebaseMethods;
+            const querySnapshot = await getDocs(collection(window.db, 'waterLevels'));
+            const data = [];
+            
+            querySnapshot.forEach((doc) => {
+                data.push({ id: doc.id, ...doc.data() });
+            });
+            
+            // Sort by timestamp (newest first)
+            return data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        } catch (error) {
+            console.error('Error loading data from Firebase:', error);
+            // Fallback to localStorage
+            const saved = localStorage.getItem('waterLevelData');
+            return saved ? JSON.parse(saved) : [];
+        }
     }
 
-    saveData() {
-        localStorage.setItem('waterLevelData', JSON.stringify(this.data));
+    async saveData() {
+        try {
+            if (!window.db) {
+                console.log('Firebase not ready, using localStorage fallback');
+                localStorage.setItem('waterLevelData', JSON.stringify(this.data));
+                return;
+            }
+
+            // For Firebase, we don't need to save all data at once
+            // Individual operations (add, update, delete) handle the database
+            console.log('Data operations handled individually in Firebase');
+        } catch (error) {
+            console.error('Error saving data to Firebase:', error);
+            // Fallback to localStorage
+            localStorage.setItem('waterLevelData', JSON.stringify(this.data));
+        }
     }
 
     addSampleData() {
@@ -468,7 +554,10 @@ class WaterLevelLogger {
 // Initialize the application when the page loads
 let waterLogger;
 document.addEventListener('DOMContentLoaded', () => {
-    waterLogger = new WaterLevelLogger();
+    // Wait a bit for Firebase to initialize
+    setTimeout(() => {
+        waterLogger = new WaterLevelLogger();
+    }, 1000);
 });
 
 // Add sample data button (for demonstration purposes)
