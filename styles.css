@@ -200,6 +200,7 @@ th {
     color: #2c3e50;
     position: sticky;
     top: 0;
+    text-align: center;
 }
 
 tr:hover {
