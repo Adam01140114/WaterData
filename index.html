@@ -1,144 +1,4248 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Water Level Logger</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-    <!-- Firebase SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyACh8hp2kL4P0xBPkwkvpLA0zNAqtw5IQc",
-            authDomain: "invoice-4f2b4.firebaseapp.com",
-            projectId: "invoice-4f2b4",
-            storageBucket: "invoice-4f2b4.firebasestorage.app",
-            messagingSenderId: "1028270499799",
-            appId: "1:1028270499799:web:31401d335232bb21bc4d92",
-            measurementId: "G-Z1HX6QN3DG"
-        };
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+     <title>WorkSmart - Calorie Tracker</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root{
+      --bg: #0b0f14;
+      --card: #121821;
+      --muted: #8aa0b4;
+      --text: #e9f0f6;
+      --accent: #6ee7b7;
+      --accent-2: #60a5fa;
+      --danger: #f87171;
+      --ring: rgba(110,231,183,.45);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:ui-sans-serif,system-ui;-webkit-font-smoothing:antialiased;color:var(--text);background:var(--bg);padding:24px}
+    .wrap{max-width:880px;margin:0 auto}
+    h1,h2,h3{text-align:center}
+    .card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:18px}
+    .field{margin-bottom:12px;text-align:left}
+    .label{font-size:14px;color:var(--muted);margin-bottom:4px;display:block;text-align:left}
+    input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0e141b;color:var(--text)}
+    button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;display:block;margin:8px auto}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#081018}
+    .ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.2)}
+    .result{margin-top:10px;min-height:38px;text-align:left}
+    .math{background:#0c1218;border:1px dashed rgba(255,255,255,.2);padding:8px;border-radius:10px;font-family:monospace;white-space:pre-wrap}
+    canvas{background:#0e141b;border-radius:10px;padding:10px}
+    .hidden{display:none}
+    .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .menu-tile{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px;border:1px solid rgba(255,255,255,.15);border-radius:14px;background:#0e141b;cursor:pointer}
+    .menu-emoji{font-size:28px}
+    .row{display:flex;gap:8px;justify-content:flex-start}
+    
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .modal-overlay.hidden {
+      display: none !important;
+    }
+    
+    /* always above slides/titles on mobile */
+    .modal-overlay { z-index: 9999 !important; }
+    .modal { position: relative; z-index: 10000; }
+    .modal {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      max-width: 400px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .modal-icon {
+      font-size: 24px;
+    }
+    
+    /* Modal Animated Fire Icon */
+    .animated-fire-modal {
+      display: inline-block;
+      width: 24px;
+      height: 24px;
+    }
+    
+    .fire-svg-modal {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.7)) drop-shadow(0 0 12px rgba(255, 150, 0, 0.3));
+    }
+    
+    .modal-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+    }
+    .modal-subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin: 4px 0 0 0;
+    }
+    .auth-toggle {
+      text-align: center;
+      margin-top: 16px;
+      color: var(--muted);
+    }
+    .auth-toggle a {
+      color: var(--accent-2);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .error-message {
+      color: var(--danger);
+      font-size: 14px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    .success-message {
+      color: var(--accent);
+      font-size: 14px;
+      margin-top: 8px;
+      text-align: center;
+    }
+    
+    /* Profile Setup Styles */
+    .profile-setup {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .profile-setup h3 {
+      margin-bottom: 16px;
+    }
+    
+         /* Settings and Logout Section */
+     .user-actions {
+       display: flex;
+       flex-direction: column;
+       gap: 8px;
+       margin-top: 16px;
+       align-items: center;
+     }
+     .user-actions button {
+       margin: 0;
+       width: auto;
+       min-width: 120px;
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+     .settings-btn {
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+     .logout-btn {
+       background: linear-gradient(135deg,var(--accent),var(--accent-2));
+       color: #081018;
+     }
+     .danger-btn {
+       background: var(--danger);
+       color: white;
+     }
+     
+     /* Mobile Swipe Navigation */
+         .mobile-container {
+      display: none;
+      overflow: visible;
+      position: relative;
+      width: 100%;
+      height: calc(var(--vh, 1vh) * 100);
+      padding-top: 60px; /* Add space for title */
+      margin: 0 auto;
+      box-sizing: border-box;
+     }
+     
+     .mobile-title {
+       position: fixed;
+       top: 0;
+       left: 0;
+       right: 0;
+       background: var(--bg);
+       padding: 16px;
+       text-align: center;
+       font-size: 18px;
+       font-weight: bold;
+       z-index: 200;
+       border-bottom: 1px solid rgba(255,255,255,0.1);
+       margin: 0 auto;
+       box-sizing: border-box;
+     }
+     
+         .mobile-slide {
+      position: absolute;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: calc(calc(var(--vh, 1vh) * 100) - 100px);
+      transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+      padding: 0 20px 20px 20px; /* Reduced bottom padding */
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      overflow-y: auto; /* Enable vertical scrolling */
+      overflow-x: hidden; /* Prevent horizontal scrolling */
+      -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+      will-change: transform, opacity; /* Optimize for animations */
+    }
+     
+     .mobile-slide.active {
+       transform: translateX(0);
+       z-index: 10;
+     }
+     
+     .mobile-slide.prev {
+       transform: translateX(-100%);
+       z-index: 5;
+     }
+     
+     .mobile-slide.next {
+       transform: translateX(100%);
+       z-index: 5;
+     }
+     
+         .mobile-slide-content {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 24px 24px 24px;
+      margin: 16px auto 8px auto;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      flex: none; /* Don't expand to fill space */
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+    }
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        
-        // Make Firebase available globally
-        window.firebaseApp = app;
-        window.db = db;
-        window.firebaseMethods = {
-            addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, collection
-        };
-    </script>
+    .mobile-slide-content-streak {
+      
+      border-radius: var(--radius);
+      padding: 35px 24px 0px 24px;
+      margin: 16px auto;
+      margin-bottom: 0px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      flex: none; /* Don't expand to fill space */
+      max-height: 70vh; /* Limit height to 70% of viewport */
+      max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: visible;
+    }
+     
+     .mobile-slide-content h2 {
+       margin-top: 0;
+       margin-bottom: 16px;
+       text-align: center;
+       font-size: 20px;
+     }
+     
+     .mobile-slide-content canvas {
+       margin-bottom: 16px;
+       max-height: 200px;
+     }
+     
+     .mobile-slide-content .user-actions {
+       margin-top: 0;
+     }
+     
+     .mobile-slide-content .user-actions button {
+       margin-bottom: 8px;
+       width: 100%;
+     }
+     
+     .mobile-slide-content .user-actions button:last-child {
+       margin-bottom: 0;
+     }
+     
+         /* Combined Navigation Container */
+    .mobile-navigation {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg);
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding: 12px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    .mobile-indicators {
+      display: flex;
+      gap: 8px;
+    }
+     
+     .mobile-indicator {
+       width: 8px;
+       height: 8px;
+       border-radius: 50%;
+       background: var(--muted);
+       transition: background 0.3s ease, transform 0.2s ease;
+       cursor: pointer;
+     }
+     
+     .mobile-indicator:hover {
+       transform: scale(1.2);
+     }
+     
+     .mobile-indicator.active {
+       background: var(--accent);
+     }
+     
+     /* Swipe Hint */
+     .swipe-hint {
+       background: rgba(0, 0, 0, 0.7);
+       color: var(--text);
+       padding: 8px 16px;
+       border-radius: 20px;
+       font-size: 12px;
+       opacity: 0.8;
+             pointer-events: none;
+       animation: fadeInOut 3s ease-in-out infinite;
+     }
+     
+     @keyframes fadeInOut {
+       0%, 100% { opacity: 0.3; }
+       50% { opacity: 0.8; }
+     }
+     
+     /* Desktop styles */
+     .desktop-container {
+       display: block;
+     }
+     
+     /* Streak Module Styles */
+         .streak-module {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border-radius: 20px;
+      margin: 5px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: visible;
+    }
+     
+         .streak-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+     
+         .streak-icon {
+      font-size: 40px;
+      filter: drop-shadow(0 0 12px rgba(255, 165, 0, 0.6));
+    }
+    
+    /* Animated Fire Icon */
+    .animated-fire {
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+    }
+    
+    .fire-svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.6)) drop-shadow(0 0 16px rgba(255, 150, 0, 0.3)) drop-shadow(0 0 24px rgba(255, 200, 0, 0.2));
+    }
+    
+    .fire-flame-1 {
+      animation: fireFlicker1 1.2s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    .fire-flame-2 {
+      animation: fireFlicker2 0.8s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    .fire-flame-3 {
+      animation: fireFlicker3 1.0s ease-in-out infinite alternate;
+      transform-origin: bottom center;
+    }
+    
+    @keyframes fireFlicker1 {
+      0% { transform: scale(1) rotate(-1deg) translateY(0px); }
+      50% { transform: scale(1.05) rotate(1deg) translateY(-1px); }
+      100% { transform: scale(0.98) rotate(-0.5deg) translateY(0px); }
+    }
+    
+    @keyframes fireFlicker2 {
+      0% { transform: scale(1) rotate(1deg) translateY(0px); }
+      50% { transform: scale(1.03) rotate(-1deg) translateY(-1px); }
+      100% { transform: scale(1.01) rotate(0.5deg) translateY(0px); }
+    }
+    
+    @keyframes fireFlicker3 {
+      0% { transform: scale(1) rotate(0deg) translateY(0px); }
+      50% { transform: scale(1.02) rotate(0.5deg) translateY(-1px); }
+      100% { transform: scale(0.99) rotate(-0.3deg) translateY(0px); }
+    }
+     
+     .streak-info {
+       flex: 1;
+     }
+     
+     .streak-count {
+       font-size: 32px;
+       font-weight: bold;
+       color: #fbbf24;
+       text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+       line-height: 1;
+     }
+     
+     .streak-label {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+         .streak-progress {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-bottom: 12px;
+      overflow: hidden;
+    }
+     
+     .streak-bar {
+       height: 100%;
+       background: linear-gradient(90deg, #fbbf24, #f59e0b);
+       border-radius: 4px;
+       transition: width 0.5s ease;
+       width: 0%;
+     }
+     
+     .streak-stats {
+       display: flex;
+       justify-content: space-around;
+       gap: 16px;
+     }
+     
+     .streak-stat {
+       text-align: center;
+       flex: 1;
+     }
+     
+     .stat-value {
+       display: block;
+       font-size: 20px;
+       font-weight: bold;
+       color: var(--accent);
+       line-height: 1;
+     }
+     
+     .stat-label {
+       font-size: 12px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+     /* Desktop Streak Styles */
+     .streak-card {
+       background: linear-gradient(135deg, #1e293b, #334155);
+       border: 1px solid rgba(255, 255, 255, 0.1);
+       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+     }
+     
+     .streak-container {
+       padding: 8px;
+     }
+     
+     .streak-main {
+       display: flex;
+       align-items: center;
+       gap: 24px;
+       margin-bottom: 24px;
+     }
+     
+         .streak-icon-large {
+      font-size: 56px;
+      filter: drop-shadow(0 0 18px rgba(255, 165, 0, 0.8));
+    }
+    
+    /* Large Animated Fire Icon */
+    .animated-fire-large {
+      display: inline-block;
+      width: 56px;
+      height: 56px;
+    }
+    
+    .fire-svg-large {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 16px rgba(255, 100, 0, 0.9)) drop-shadow(0 0 24px rgba(255, 150, 0, 0.5));
+    }
+     
+     .streak-details {
+       flex: 1;
+     }
+     
+     .streak-count-large {
+       font-size: 48px;
+       font-weight: bold;
+       color: #fbbf24;
+       text-shadow: 0 0 15px rgba(251, 191, 36, 0.6);
+       line-height: 1;
+     }
+     
+     .streak-label-large {
+       font-size: 18px;
+       color: var(--text);
+       margin-top: 8px;
+       font-weight: 600;
+     }
+     
+     .streak-subtitle {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 4px;
+     }
+     
+     .streak-progress-large {
+       height: 12px;
+       background: rgba(255, 255, 255, 0.1);
+       border-radius: 6px;
+       margin-bottom: 24px;
+       overflow: hidden;
+     }
+     
+     .streak-bar-large {
+       height: 100%;
+       background: linear-gradient(90deg, #fbbf24, #f59e0b);
+       border-radius: 6px;
+       transition: width 0.5s ease;
+       width: 0%;
+     }
+     
+     .streak-stats-large {
+       display: grid;
+       grid-template-columns: repeat(3, 1fr);
+       gap: 24px;
+     }
+     
+     .streak-stat-large {
+       text-align: center;
+     }
+     
+     .stat-value-large {
+       display: block;
+       font-size: 28px;
+       font-weight: bold;
+       color: var(--accent);
+       line-height: 1;
+     }
+     
+     .stat-label-large {
+       font-size: 14px;
+       color: var(--muted);
+       margin-top: 8px;
+     }
+     
+     /* Mobile styles */
+     @media (max-width: 768px) {
+       .desktop-container {
+         display: none;
+       }
+       
+       .mobile-container {
+         display: block;
+       }
+       
+       body {
+         padding: 0;
+         margin: 0;
+         overflow: hidden;
+         touch-action: pan-y; /* Allow vertical scrolling but optimize for horizontal swipes */
+       }
+       
+       .wrap {
+         max-width: none;
+         margin: 0;
+         padding: 0;
+       }
+       
+       h1 {
+         display: none; /* Hide desktop title on mobile */
+       }
+       
+             .mobile-slide.active {
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y; /* Allow vertical scrolling within slides */
+      }
+       
+       .modal-overlay {
+         overflow-y: auto;
+         -webkit-overflow-scrolling: touch;
+       }
+       
+       .streak-module {
+         margin: 0;
+         padding: 15px 25px 15px 25px;
+       }
+       
+       .streak-count {
+         font-size: 28px;
+       }
+       
+             .streak-icon {
+        font-size: 10px;
+        filter: drop-shadow(0 0 8px rgba(255, 100, 0, 0.6)) drop-shadow(0 0 16px rgba(255, 150, 0, 0.3)) drop-shadow(0 0 24px rgba(255, 200, 0, 0.2));
+        margin-top: 12px;
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+      
+      .animated-fire {
+        width: 60px;
+        height: 60px;
+      }
+       
+       /* Improve touch responsiveness */
+       .mobile-slide-content {
+         touch-action: pan-y;
+         -webkit-user-select: none;
+         user-select: none;
+       }
+
+       .mobile-slide-content-streak {
+         touch-action: pan-y;
+         -webkit-user-select: none;
+         user-select: none;
+       }
+       
+       /* Prevent text selection during swipes */
+       .mobile-container {
+         -webkit-user-select: none;
+         user-select: none;
+       }
+       
+       /* Additional centering fixes for edge cases */
+       .mobile-slide {
+         left: 0 !important;
+         right: 0 !important;
+         margin-left: 0 !important;
+         margin-right: 0 !important;
+       }
+       
+       .mobile-slide-content {
+         margin-left: auto !important;
+         margin-right: auto !important;
+         max-width: 100% !important;
+       }
+
+       .mobile-slide-content-streak {
+         margin-left: auto !important;
+         margin-right: auto !important;
+         max-width: 100% !important;
+       }
+       
+       /* Ensure proper centering on very wide screens */
+       @media (min-width: 768px) and (max-width: 1024px) {
+         .mobile-container {
+           max-width: 100vw;
+           margin: 0 auto;
+         }
+       }
+       
+       /* Handle landscape orientation centering */
+       @media (orientation: landscape) {
+         .mobile-slide {
+           left: 0 !important;
+           right: 0 !important;
+         }
+       }
+       
+       /* Consistent spacing for all screen sizes */
+       .streak-module {
+         margin: 0 !important;
+       }
+       
+       /* Additional responsive improvements for very small screens */
+       @media (max-width: 360px) {
+         .streak-module {
+           padding: 12px 20px !important;
+           margin: 0 !important;
+         }
+         
+         .mobile-slide {
+           padding: 0 16px 16px 16px !important;
+         }
+       }
+     }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🌊 Water Level Logger</h1>
-            <p>Monitor and track your water levels</p>
-        </header>
+     <div class="wrap">
+     <h1>WorkSmart - Calorie Tracker</h1>
 
-        <main>
-            <!-- Data Entry Section -->
-            <section class="data-entry">
-                <h2>Log Water Level</h2>
-                <form id="waterLevelForm">
-                    <div class="form-group">
-                        <label for="siteSelect">Water Site:</label>
-                        <select id="siteSelect" required>
-                            <option value="">Select a site</option>
-                            <option value="Site A">Site A</option>
-                            <option value="Site B">Site B</option>
-                            <option value="Site C">Site C</option>
-                            <option value="Site D">Site D</option>
-                            <option value="Site E">Site E</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="waterLevel">Water Level (cm):</label>
-                        <input type="number" id="waterLevel" step="0.1" min="0" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="timestamp">Date & Time:</label>
-                        <input type="datetime-local" id="timestamp" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="notes">Notes (optional):</label>
-                        <textarea id="notes" rows="3" placeholder="Any additional observations..."></textarea>
-                    </div>
-                    
-                    <button type="submit" class="btn-primary">Log Water Level</button>
-                </form>
-            </section>
+     <!-- Mobile Container -->
+     <div class="mobile-container">
+       <!-- Mobile Title -->
+       <div class="mobile-title">Smart Calorie Tracker</div>
+       
+      
+       <div class="mobile-slide active" id="mobile-slide-1">
 
-            <!-- Data Visualization Section -->
-            <section class="visualization">
-                <h2>Water Level Trends</h2>
-                
-                <div class="chart-controls">
-                    <div class="form-group">
-                        <label for="chartSiteSelect">Select Site for Chart:</label>
-                        <select id="chartSiteSelect">
-                            <option value="all">All Sites</option>
-                            <option value="Site A">Site A</option>
-                            <option value="Site B">Site B</option>
-                            <option value="Site C">Site C</option>
-                            <option value="Site D">Site D</option>
-                            <option value="Site E">Site E</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="timeRange">Time Range:</label>
-                        <select id="timeRange">
-                            <option value="90">Last 3 months</option>
-                            <option value="180">Last 6 months</option>
-                            <option value="270">Last 9 months</option>
-                            <option value="all">All time</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <canvas id="waterLevelChart"></canvas>
-                    <div id="noDataMessage" class="no-data-message" style="display: none;">
-                        <p>No data available to display. </p>
-                    </div>
-                </div>
-            </section>
+      <!-- Streak Module -->
+       <div class="mobile-slide-content-streak" style="display:none";>
+         <div class="streak-module">
+         <div class="streak-header">
+           <div class="streak-icon">
+            <div class="animated-fire">
+              <svg class="fire-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g class="fire-flame-1">
+                  <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                </g>
+                <g class="fire-flame-2">
+                  <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                </g>
+                <g class="fire-flame-3">
+                  <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                </g>
+                <defs>
+                  <linearGradient id="fireGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff6b35;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#f7931e;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#ffd23f;stop-opacity:1" />
+                  </linearGradient>
+                  <linearGradient id="fireGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ff8c42;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#ffd23f;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                  </linearGradient>
+                  <linearGradient id="fireGradient3" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#ffd23f;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#fff;stop-opacity:1" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+           <div class="streak-info">
+             <div class="streak-count" id="mobileStreakCount">0</div>
+             <div class="streak-label">Day Streak</div>
+           </div>
+         </div>
+         <div class="streak-progress">
+           <div class="streak-bar" id="mobileStreakBar"></div>
+         </div>
+         <div class="streak-stats">
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileBestStreak">0</span>
+             <span class="stat-label">Best</span>
+           </div>
+           <div class="streak-stat">
+             <span class="stat-value" id="mobileAverageStreak">0</span>
+             <span class="stat-label">Avg Streak</span>
+           </div>
+         </div>
+         </div>
+       </div>
+       
+       <!-- Slide 1: Total Calories Burned -->
+       
+         <div class="mobile-slide-content">
 
-            <!-- Data Table Section -->
-            <section class="data-table">
-                <h2>Recent Entries</h2>
-                <div class="table-controls">
-                    <button id="exportBtn" class="btn-secondary">Export Data</button>
-                    <button id="clearDataBtn" class="btn-danger">Clear All Data</button>
-                </div>
-                <div class="table-container">
-                    <table id="dataTable">
-                        <thead>
-                            <tr>
-                                <th>Site</th>
-                                <th>Water Level (cm)</th>
-                                <th>Date & Time</th>
-                                <th>Notes</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="dataTableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
+          <h2>Calories Burnt With Workout</h2>
+           <canvas id="mobileWorkoutChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
+           <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+
+           <br><br>
+           <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
+           <br>
+           
+           <h2>Weight Trajectory</h2>
+           <canvas id="mobileWeightChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
+           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
+           
+         </div>
+       </div>
+
+       <br><br>
+       <!-- Slide 2: Calories Burned With Workouts -->
+       <div class="mobile-slide next" id="mobile-slide-2">
+         <div class="mobile-slide-content">
+          <h2>Total Calorie Deficit</h2>
+          <canvas id="mobileTotalChart" height="200"></canvas>
+          <button class="ghost" id="mobileToggleFat">Show More</button>
+          <button class="primary" id="mobileAddCaloriesBtn">Add Calories</button>
+         </div>
+       </div>
+
+       <!-- Slide 3: Foods Eaten -->
+       <div class="mobile-slide next" id="mobile-slide-3">
+         <div class="mobile-slide-content">
+           <h2>Foods Eaten</h2>
+           <canvas id="mobileFoodChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleFoodDetail">Show More</button>
+           <button class="primary" id="mobileShowFoods">Show Foods</button>
+         </div>
+       </div>
+
+
+       <!-- Slide 4: User Profile -->
+       <div class="mobile-slide next" id="mobile-slide-4">
+         <div class="mobile-slide-content">
+           <h2>User Profile</h2>
+           <div class="user-actions">
+             <button class="settings-btn" id="mobileOpenSettings" disabled>Settings</button>
+             <button class="ghost" id="mobileFixLayoutBtn" style="display: none;" onclick="emergencyLayoutFix()">Fix Layout</button>
+             <button class="danger-btn" id="mobileDeleteAccountBtn">Delete Account</button>
+             <button class="logout-btn" id="mobileLogoutBtn">Logout</button>
+           </div>
+         </div>
+       </div>
+
+             <!-- Mobile Navigation -->
+      <div class="mobile-navigation">
+        <div class="swipe-hint">
+          <span>← Swipe to navigate →</span>
+        </div>
+        <div class="mobile-indicators">
+          <div class="mobile-indicator active"></div>
+          <div class="mobile-indicator"></div>
+          <div class="mobile-indicator"></div>
+          <div class="mobile-indicator"></div>
+        </div>
+      </div>
+     </div> 
+     <!-- Desktop Container -->
+     <div class="desktop-container">
+
+     <!-- Authentication Modal -->
+    <div id="authModal" class="modal-overlay hidden">
+      <div class="modal">
+        <!-- Login Form -->
+        <div id="loginForm">
+          <div class="modal-header">
+            <div class="modal-icon">🔓</div>
+                         <div>
+               <h3 class="modal-title">Welcome Back</h3>
+               <p class="modal-subtitle">Sign in to access your workout tracker</p>
+             </div>
+          </div>
+          <div class="field">
+            <label class="label">EMAIL ADDRESS</label>
+            <input id="loginEmail" type="email" placeholder="Enter your email" />
+          </div>
+          <div class="field">
+            <label class="label">PASSWORD</label>
+            <input id="loginPassword" type="password" placeholder="Enter your password" />
+          </div>
+                     <button class="primary" id="loginBtn">Sign In</button>
+           <div class="auth-toggle">
+             Don't have an account? <a id="showSignup">Create one here</a>
+           </div>
+                       <div id="loginError" class="error-message hidden"></div>
+        </div>
+
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+          <div class="modal-header">
+            <div class="modal-icon">🚀</div>
+                         <div>
+               <h3 class="modal-title">Create Account</h3>
+               <p class="modal-subtitle">Join WorkSmart and track your fitness journey</p>
+             </div>
+          </div>
+          <div class="field">
+            <label class="label">EMAIL ADDRESS</label>
+            <input id="signupEmail" type="email" placeholder="Enter your email" />
+          </div>
+          <div class="field">
+            <label class="label">PASSWORD</label>
+            <input id="signupPassword" type="password" placeholder="Enter your password" />
+            <small style="color: var(--muted); font-size: 12px;">Minimum 6 characters</small>
+          </div>
+          <div class="field">
+            <label class="label">CONFIRM PASSWORD</label>
+            <input id="confirmPassword" type="password" placeholder="Confirm your password" />
+          </div>
+          <button class="primary" id="signupBtn">Create Account</button>
+          <div class="auth-toggle">
+            Already have an account? <a id="showLogin">Sign in here</a>
+          </div>
+          <div id="signupError" class="error-message hidden"></div>
+        </div>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Profile Setup Modal -->
+    <div id="profileModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="profile-setup">
+          <h3>Complete Your Profile</h3>
+          <p>Let's calculate your BMR to get started</p>
+        </div>
+        <div class="field">
+          <label class="label" for="setupAge">Age</label>
+          <input id="setupAge" type="number" placeholder="22" />
+        </div>
+        <div class="field">
+          <label class="label">Height</label>
+          <div class="row">
+            <input id="setupHeightFt" type="number" placeholder="5" />
+            <input id="setupHeightIn" type="number" placeholder="9" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label" for="setupWeight">Weight (lb)</label>
+          <input id="setupWeight" type="number" placeholder="170" />
+        </div>
+        <div class="result" id="setupResult"></div>
+        <button class="primary" id="saveProfileBtn">Save Profile</button>
+        <div id="profileError" class="error-message hidden"></div>
+      </div>
+    </div>
+
+         <!-- Settings Modal -->
+     <div id="settingsModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚙️</div>
+           <div>
+             <h3 class="modal-title">User Settings</h3>
+             <p class="modal-subtitle">Update your profile information</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="settingsAge">Age</label>
+           <input id="settingsAge" type="number" />
+         </div>
+         <div class="field">
+           <label class="label">Height</label>
+           <div class="row">
+             <input id="settingsHeightFt" type="number" />
+             <input id="settingsHeightIn" type="number" />
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="settingsWeight">Weight (lb)</label>
+           <input id="settingsWeight" type="number" />
+         </div>
+         <div class="field">
+           <label class="label" for="settingsTheme">Theme</label>
+           <select id="settingsTheme">
+             <option value="dark">Dark Mode</option>
+             <option value="light">Light Mode</option>
+           </select>
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="saveSettings">Save</button>
+           <button class="ghost" id="cancelSettings">Back</button>
+         </div>
+         <div id="settingsError" class="error-message hidden"></div>
+         <div id="settingsSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Add Calories Modal -->
+     <div id="addCaloriesModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">
+            <div class="animated-fire-modal">
+              <svg class="fire-svg-modal" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <g class="fire-flame-1">
+                  <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                </g>
+                <g class="fire-flame-2">
+                  <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                </g>
+                <g class="fire-flame-3">
+                  <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+           <div>
+             <h3 class="modal-title">Add Calories</h3>
+             <p class="modal-subtitle">Log your activity calories</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="caloriesAmount">Calories</label>
+           <input id="caloriesAmount" type="number" placeholder="Enter calories (positive or negative)" />
+           <small style="color: var(--muted); font-size: 12px;">Use negative values to subtract calories</small>
+         </div>
+         <div class="field">
+           <label class="label" for="caloriesDate">Date</label>
+           <input id="caloriesDate" type="date" />
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="submitAddCalories">Submit</button>
+           <button class="ghost" id="cancelAddCalories">Cancel</button>
+         </div>
+         <div id="addCaloriesError" class="error-message hidden"></div>
+         <div id="addCaloriesSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Weight Logging Modal -->
+     <div id="weightLoggingModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚖️</div>
+           <div>
+             <h3 class="modal-title">Daily Weight Check</h3>
+             <p class="modal-subtitle">Have you weighed yourself today?</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="dailyWeight">Weight (lb)</label>
+           <input id="dailyWeight" type="number" step="0.1" placeholder="Enter your weight" />
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="submitDailyWeight">Submit</button>
+           <button class="ghost" id="maybeLaterWeight">Maybe Later</button>
+           <button class="ghost" id="closeWeightModal">Close</button>
+         </div>
+         <div id="weightLoggingError" class="error-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Add Weight Modal -->
+     <div id="addWeightModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">⚖️</div>
+           <div>
+             <h3 class="modal-title">Add Weight</h3>
+             <p class="modal-subtitle">Log your weight for a specific date</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="weightAmount">Weight (lb)</label>
+           <input id="weightAmount" type="number" step="0.1" placeholder="Enter your weight" />
+         </div>
+         <div class="field">
+           <label class="label" for="weightDate">Date</label>
+           <input id="weightDate" type="date" />
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="submitAddWeight">Submit</button>
+           <button class="ghost" id="cancelAddWeight">Cancel</button>
+         </div>
+         <div id="addWeightError" class="error-message hidden"></div>
+         <div id="addWeightSuccess" class="success-message hidden"></div>
+       </div>
+     </div>
+
+     <!-- Mobile Workout Menu Modal -->
+     <div id="mobileWorkoutModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🏋️</div>
+           <div>
+             <h3 class="modal-title">Choose a Workout</h3>
+             <p class="modal-subtitle">Select your workout type</p>
+           </div>
+         </div>
+         <div class="menu-grid" style="margin-bottom: 20px;">
+           <div class="menu-tile" id="mobileOpenTreadmill">
+             <div class="menu-emoji">🏃‍♂️</div>
+             <div>Treadmill</div>
+           </div>
+           <div class="menu-tile" id="mobileOpenStairs">
+             <div class="menu-emoji">🧗</div>
+             <div>Stair Master</div>
+           </div>
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="closeMobileWorkoutMenu">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Treadmill Modal -->
+     <div id="mobileTreadmillModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🏃‍♂️</div>
+           <div>
+             <h3 class="modal-title">Treadmill Calories</h3>
+             <p class="modal-subtitle">ACSM Walking Equation</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTspeed">Speed (mph)</label>
+           <input id="mobileTspeed" type="number" step="0.1" placeholder="3.5" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTgrade">Incline (%)</label>
+           <input id="mobileTgrade" type="number" step="0.1" placeholder="7.5" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileTdur">Duration (min)</label>
+           <input id="mobileTdur" type="number" placeholder="30" />
+         </div>
+         <div class="result" id="mobileTresult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileTcalc">Log Calories</button>
+           <button class="ghost" id="closeMobileTreadmill">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Stairs Modal -->
+     <div id="mobileStairsModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🧗</div>
+           <div>
+             <h3 class="modal-title">Stair Master Calories</h3>
+             <p class="modal-subtitle">MET Method</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileSdur">Duration (min)</label>
+           <input id="mobileSdur" type="number" placeholder="20" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileSintensity">Intensity</label>
+           <select id="mobileSintensity">
+             <option value="6">Easy · 6 MET</option>
+             <option value="8.8" selected>Moderate · 8.8 MET</option>
+             <option value="10.3">Hard · 10.3 MET</option>
+             <option value="custom">Custom MET</option>
+           </select>
+         </div>
+         <div class="field hidden" id="mobileCustomMetField">
+           <label class="label" for="mobileScustom">Custom MET</label>
+           <input id="mobileScustom" type="number" step="0.1" placeholder="9.5" />
+         </div>
+         <div class="result" id="mobileSresult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileScalc">Log Calories</button>
+           <button class="ghost" id="closeMobileStairs">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Food Menu Modal -->
+     <div id="mobileFoodModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">🍽️</div>
+           <div>
+             <h3 class="modal-title">Choose Food</h3>
+             <p class="modal-subtitle">Select your food type</p>
+           </div>
+         </div>
+         <div class="menu-grid" style="margin-bottom: 20px;">
+           <div class="menu-tile" id="mobileOpenTacos">
+             <div class="menu-emoji">🌮</div>
+             <div>Tacos</div>
+           </div>
+           <div class="menu-tile" id="mobileOpenBurger">
+             <div class="menu-emoji">🍔</div>
+             <div>Burger</div>
+           </div>
+         </div>
+         <div class="user-actions">
+           <button class="primary" id="mobileAddCustomFood" style="background: #60a5fa; color: white;">Add Foods</button>
+           <button class="ghost" id="closeMobileFoodMenu">Close</button>
+         </div>
+       </div>
+     </div>
+
+
+     <!-- Mobile Custom Food Modal -->
+     <div id="mobileCustomFoodModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon" id="customFoodIcon">🍽️</div>
+           <div>
+             <h3 class="modal-title">Add Custom Food</h3>
+             <p class="modal-subtitle">Create your own food entry</p>
+           </div>
+         </div>
+         <div class="field">
+           <label class="label" for="mobileCustomFoodName">Food Name</label>
+           <input id="mobileCustomFoodName" type="text" placeholder="e.g., Chicken Salad" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileCustomFoodCalories">Calories</label>
+           <input id="mobileCustomFoodCalories" type="number" placeholder="350" />
+         </div>
+         <div class="result" id="mobileCustomFoodResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="mobileCustomFoodCalc">Add Food</button>
+           <button class="danger-btn" id="mobileDeleteCustomFood" style="background: #f87171; color: white;">Delete Food</button>
+           <button class="ghost" id="closeMobileCustomFood">Close</button>
+         </div>
+       </div>
+     </div>
+
+         <!-- Main App Content (hidden until authenticated) -->
+     <div id="appContent" class="hidden">
+
+      <!-- Streak Module -->
+      <section class="card streak-card">
+        <div class="streak-container">
+          <div class="streak-main">
+            <div class="streak-icon-large">
+              <div class="animated-fire-large">
+                <svg class="fire-svg-large" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <g class="fire-flame-1">
+                    <path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/>
+                  </g>
+                  <g class="fire-flame-2">
+                    <path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/>
+                  </g>
+                  <g class="fire-flame-3">
+                    <path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/>
+                  </g>
+                </svg>
+              </div>
+            </div>
+            <div class="streak-details">
+              <div class="streak-count-large" id="desktopStreakCount">0</div>
+              <div class="streak-label-large">Day Workout Streak</div>
+              <div class="streak-subtitle">Keep the fire burning! <span class="animated-fire-modal" style="display: inline-block; width: 16px; height: 16px;"><svg class="fire-svg-modal" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 16px; height: 16px;"><g class="fire-flame-1"><path d="M12 2C8 6 6 10 6 14C6 17.3 8.7 20 12 20C15.3 20 18 17.3 18 14C18 10 16 6 12 2Z" fill="url(#fireGradient1)"/></g><g class="fire-flame-2"><path d="M12 4C9 7 7.5 10 7.5 13C7.5 15.5 9.5 17.5 12 17.5C14.5 17.5 16.5 15.5 16.5 13C16.5 10 15 7 12 4Z" fill="url(#fireGradient2)"/></g><g class="fire-flame-3"><path d="M12 6C10 8.5 9 11 9 13C9 14.7 10.3 16 12 16C13.7 16 15 14.7 15 13C15 11 14 8.5 12 6Z" fill="url(#fireGradient3)"/></g></svg></span></div>
+            </div>
+          </div>
+          <div class="streak-progress-large">
+            <div class="streak-bar-large" id="desktopStreakBar"></div>
+          </div>
+          <div class="streak-stats-large">
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopBestStreak">0</span>
+              <span class="stat-label-large">Best Streak</span>
+            </div>
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopAverageStreak">0</span>
+              <span class="stat-label-large">Avg Streak</span>
+            </div>
+            <div class="streak-stat-large">
+              <span class="stat-value-large" id="desktopCurrentWeek">0</span>
+              <span class="stat-label-large">This Week</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Total Burned -->
+      <section class="card">
+        <h2>Total Calorie Deficit</h2>
+        <canvas id="totalChart" height="200"></canvas>
+        <button class="ghost" id="toggleFat">Show More</button>
+        <button class="primary" id="addCaloriesBtn">Add Calories</button>
+      </section>
+
+             <!-- Weight Trajectory -->
+       <section class="card">
+         <h2>Weight Trajectory</h2>
+         <canvas id="weightChart" height="200"></canvas>
+         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
+         <button class="primary" id="addWeightBtn">Add Weight</button>
+       </section>
+
+      <!-- Workouts Menu (hidden by default) -->
+      <section class="card hidden" id="workoutMenu">
+        <h2>Choose a Workout</h2>
+        <div class="menu-grid">
+          <div class="menu-tile" id="openTreadmill">
+            <div class="menu-emoji">🏃‍♂️</div>
+            <div>Treadmill</div>
+          </div>
+          <div class="menu-tile" id="openStairs">
+            <div class="menu-emoji">🧗</div>
+            <div>Stair Master</div>
+          </div>
+        </div>
+        <button class="ghost" id="hideWorkouts">Hide Workouts</button>
+      </section>
+
+             <!-- Show/Hide Workouts Button -->
+       <section class="card" id="workoutToggleSection">
+         <h2>Calories Burnt With Workouts</h2>
+         <canvas id="workoutChart" height="200"></canvas>
+         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
+         <button class="primary" id="showWorkouts">Show Workouts</button>
+       </section>
+
+                            <!-- Treadmill Section -->
+       <section class="card hidden" id="treadmillSection">
+        <h2>Treadmill Calories · ACSM Walking Equation</h2>
+        <div class="field">
+          <label class="label" for="tspeed">Speed (mph)</label>
+          <input id="tspeed" type="number" step="0.1" placeholder="3.5" />
+        </div>
+        <div class="field">
+          <label class="label" for="tgrade">Incline (%)</label>
+          <input id="tgrade" type="number" step="0.1" placeholder="7.5" />
+        </div>
+        <div class="field">
+          <label class="label" for="tdur">Duration (min)</label>
+          <input id="tdur" type="number" placeholder="30" />
+        </div>
+                 <div class="result" id="tresult"></div>
+         <button class="primary" id="tcalc">Log Calories</button>
+         <canvas id="tchart" height="200"></canvas>
+         <button class="ghost" id="toggleTreadmillFat">Show Fat Loss</button>
+         <button class="primary" id="backFromTreadmill">Back</button>
+      </section>
+
+      <!-- Stair Master Section -->
+      <section class="card hidden" id="stairSection">
+        <h2>Stair Master Calories · MET Method</h2>
+        <div class="field">
+          <label class="label" for="sdur">Duration (min)</label>
+          <input id="sdur" type="number" placeholder="20" />
+        </div>
+        <div class="field">
+          <label class="label" for="sintensity">Intensity</label>
+          <select id="sintensity">
+            <option value="6">Easy · 6 MET</option>
+            <option value="8.8" selected>Moderate · 8.8 MET</option>
+            <option value="10.3">Hard · 10.3 MET</option>
+            <option value="custom">Custom MET</option>
+          </select>
+        </div>
+        <div class="field hidden" id="customMetField">
+          <label class="label" for="scustom">Custom MET</label>
+          <input id="scustom" type="number" step="0.1" placeholder="9.5" />
+        </div>
+                 <div class="result" id="sresult"></div>
+         <button class="primary" id="scalc">Log Calories</button>
+         <canvas id="schart" height="200"></canvas>
+         <button class="ghost" id="toggleStairsFat">Show Fat Loss</button>
+                  <button class="primary" id="backFromStairs">Back</button>
+       </section>
+
+       <!-- Settings and Logout Section -->
+       <section class="card">
+
+        <h2>User Profile</h2>
+
+         <div class="user-actions">
+           <button class="settings-btn" id="openSettings" disabled>Settings</button>
+           <button class="ghost" id="fixLayoutBtn" onclick="emergencyLayoutFix()">Fix Mobile Layout</button>
+           <button class="danger-btn" id="deleteAccountBtn">Delete Account</button>
+           <button class="logout-btn" id="logoutBtn">Logout</button>
+         </div>
+       </section>
+     </div>
+     </div> <!-- Close desktop-container -->
+   </div>
+
+  <script>
+    // ===== Firebase Configuration =====
+    const firebaseConfig = {
+      apiKey: "AIzaSyCgu5VzQcD0hPEpcslrizbiat_Q8VKPa3I",
+      authDomain: "workout-b4051.firebaseapp.com",
+      projectId: "workout-b4051",
+      storageBucket: "workout-b4051.firebasestorage.app",
+      messagingSenderId: "162149362879",
+      appId: "1:162149362879:web:7db78878fa79bf9b4eea0a",
+      measurementId: "G-6Y3WBWFE98"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+         // ===== Modal Management =====
+    function liftModalsToBody() {
+      const ids = [
+        'authModal',
+        'profileModal',
+        'settingsModal',
+        'addCaloriesModal',
+        'weightLoggingModal',
+        'addWeightModal',
+        'mobileWorkoutModal',
+        'mobileTreadmillModal',
+        'mobileStairsModal',
+        'mobileFoodModal',
+        'mobileCustomFoodModal'
+      ];
+      ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.parentElement !== document.body) {
+          document.body.appendChild(el);
+        }
+      });
+    }
+
+         // ===== Authentication State Management =====
+     let currentUser = null;
+     let userProfile = null;
+     let authStateInitialized = false;
+
+     auth.onAuthStateChanged(async (user) => {
+       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+       
+       if (user) {
+         currentUser = user;
+         console.log('User signed in:', user.email);
+         
+         // Check if user has profile
+         try {
+           const profileDoc = await db.collection('users').doc(user.uid).get();
+           if (profileDoc.exists) {
+             userProfile = profileDoc.data();
+             console.log('Profile found, showing app');
+             showApp();
+             loadUserData();
+           } else {
+             console.log('No profile found, showing profile setup');
+             showProfileSetup();
+           }
+         } catch (error) {
+           console.error('Error checking profile:', error);
+           showAuthModal();
+         }
+       } else {
+         currentUser = null;
+         userProfile = null;
+         console.log('No user, showing auth modal');
+         // Ensure all modals are hidden first
+         hideAllModals();
+         showAuthModal();
+       }
+       
+       // Mark auth state as initialized
+       authStateInitialized = true;
+     });
+
+     // Show auth modal immediately for first-time users
+     setTimeout(() => {
+       console.log('Checking auth state - authStateInitialized:', authStateInitialized);
+       if (!authStateInitialized) {
+         console.log('Showing auth modal for first-time user');
+         showAuthModal();
+       }
+     }, 100);
+
+    // ===== UI State Management =====
+         function hideAllModals() {
+       console.log('Hiding all modals');
+       document.getElementById('authModal').classList.add('hidden');
+       document.getElementById('profileModal').classList.add('hidden');
+       const settingsModal = document.getElementById('settingsModal');
+       settingsModal.classList.add('hidden');
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.classList.add('hidden');
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.classList.add('hidden');
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.classList.add('hidden');
+       
+       // Hide mobile modals
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.classList.add('hidden');
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.classList.add('hidden');
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.classList.add('hidden');
+       
+       document.getElementById('appContent').classList.add('hidden');
+     }
+
+         function showAuthModal() {
+       console.log('showAuthModal called');
+       
+       // Ensure all other modals are hidden first
+       hideAllModals();
+       
+       const authModal = document.getElementById('authModal');
+       authModal.classList.remove('hidden');
+       authModal.style.zIndex = '2000';
+       showSignupForm(); // Show signup form by default instead of login
+     }
+
+    function hideAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+         function showLoginForm() {
+       document.getElementById('loginForm').classList.remove('hidden');
+       document.getElementById('signupForm').classList.add('hidden');
+     }
+
+     function showSignupForm() {
+       document.getElementById('loginForm').classList.add('hidden');
+       document.getElementById('signupForm').classList.remove('hidden');
+     }
+
+    function showSignupForm() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('signupForm').classList.remove('hidden');
+    }
+
+    function showProfileSetup() {
+      // Only show profile setup if user is authenticated
+      if (!currentUser) {
+        console.log('Cannot show profile setup - no authenticated user');
+        showAuthModal();
+        return;
+      }
+      
+      console.log('Showing profile setup for user:', currentUser.email);
+      document.getElementById('authModal').classList.add('hidden');
+      const profileModal = document.getElementById('profileModal');
+      profileModal.classList.remove('hidden');
+      document.getElementById('appContent').classList.add('hidden');
+    }
+
+    function hideProfileSetup() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+         function showApp() {
+       document.getElementById('authModal').classList.add('hidden');
+       document.getElementById('profileModal').classList.add('hidden');
+       document.getElementById('appContent').classList.remove('hidden');
+       
+       // Enable settings buttons
+       const desk = document.getElementById('openSettings');
+       if (desk) desk.disabled = false;
+       const mob = document.getElementById('mobileOpenSettings');
+       if (mob) mob.disabled = false;  // it was left disabled in HTML
+       
+       // Initialize mobile layout to prevent breaking
+       setTimeout(() => {
+         if (typeof reinitializeMobileLayout === 'function') {
+           reinitializeMobileLayout();
+         }
+         // Check for broken layout and fix it
+         detectAndFixBrokenLayout();
+         // Auto-fix layout on page reload for users with broken layouts
+         autoFixLayoutOnReload();
+       }, 100);
+       
+       // Immediate layout fix for users with broken layouts
+       setTimeout(() => {
+         emergencyLayoutFix();
+       }, 200);
+     }
+
+     function showAddCaloriesModal() {
+       // Set today's date as default
+       const today = new Date().toISOString().split('T')[0];
+       document.getElementById('caloriesDate').value = today;
+       document.getElementById('caloriesAmount').value = '';
+       
+       // Clear any previous messages
+       document.getElementById('addCaloriesError').classList.add('hidden');
+       document.getElementById('addCaloriesSuccess').classList.add('hidden');
+       
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.classList.remove('hidden');
+       
+       // Ensure modal is visible on mobile
+       addCaloriesModal.style.zIndex = '2000';
+     }
+
+     function hideAddCaloriesModal() {
+       const addCaloriesModal = document.getElementById('addCaloriesModal');
+       addCaloriesModal.classList.add('hidden');
+     }
+
+    function showSettings() {
+      // Only show settings if user is authenticated
+      if (!currentUser || !userProfile) {
+        console.log('User not authenticated or profile not loaded');
+        return;
+      }
+      
+      // Populate settings with current values
+      document.getElementById('settingsAge').value = userProfile.age || '';
+      document.getElementById('settingsHeightFt').value = userProfile.heightFt || '';
+      document.getElementById('settingsHeightIn').value = userProfile.heightIn || '';
+      document.getElementById('settingsWeight').value = userProfile.weight || '';
+      document.getElementById('settingsTheme').value = currentTheme || 'dark';
+      
+      const settingsModal = document.getElementById('settingsModal');
+      settingsModal.classList.remove('hidden');
+    }
+
+    function hideSettings() {
+      const settingsModal = document.getElementById('settingsModal');
+      settingsModal.classList.add('hidden');
+    }
+
+    // ===== Authentication Event Listeners =====
+    document.getElementById('showSignup').addEventListener('click', showSignupForm);
+    document.getElementById('showLogin').addEventListener('click', showLoginForm);
+
+
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value;
+      const password = document.getElementById('loginPassword').value;
+      const errorDiv = document.getElementById('loginError');
+
+      try {
+        await auth.signInWithEmailAndPassword(email, password);
+        errorDiv.classList.add('hidden');
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('signupBtn').addEventListener('click', async () => {
+      const email = document.getElementById('signupEmail').value;
+      const password = document.getElementById('signupPassword').value;
+      const confirmPassword = document.getElementById('confirmPassword').value;
+      const errorDiv = document.getElementById('signupError');
+
+      if (password !== confirmPassword) {
+        errorDiv.textContent = 'Passwords do not match';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      if (password.length < 6) {
+        errorDiv.textContent = 'Password must be at least 6 characters';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        await auth.createUserWithEmailAndPassword(email, password);
+        errorDiv.classList.add('hidden');
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+      }
+    });
+
+    // ===== Profile Setup =====
+    document.getElementById('saveProfileBtn').addEventListener('click', async () => {
+      const age = +document.getElementById('setupAge').value;
+      const heightFt = +document.getElementById('setupHeightFt').value;
+      const heightIn = +document.getElementById('setupHeightIn').value;
+      const weight = +document.getElementById('setupWeight').value;
+      const errorDiv = document.getElementById('profileError');
+
+      if (!age || !heightFt || !weight) {
+        errorDiv.textContent = 'Please fill in all fields';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+             try {
+         const bmr = calcBMR(age, weight, heightFt, heightIn);
+         userProfile = { age, heightFt, heightIn, weight, bmr };
+         
+         await db.collection('users').doc(currentUser.uid).set(userProfile);
+         
+         // Log initial weight for today
+         const today = todayStr();
+         weightByDate[today] = weight;
+         await saveUserData();
+         
+         hideProfileSetup();
+         showApp();
+         loadUserData();
+         errorDiv.classList.add('hidden');
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+       }
+    });
+
+    // ===== Settings Management =====
+    document.getElementById('openSettings').addEventListener('click', () => {
+      // Double-check authentication before showing settings
+      if (!currentUser || !userProfile) {
+        console.log('Settings access denied - user not authenticated');
+        return;
+      }
+      showSettings();
+    });
+    document.getElementById('cancelSettings').addEventListener('click', hideSettings);
+    
+
+
+    document.getElementById('saveSettings').addEventListener('click', async () => {
+      // Check if user is authenticated
+      if (!currentUser) {
+        const errorDiv = document.getElementById('settingsError');
+        errorDiv.textContent = 'Please log in to save settings';
+        errorDiv.classList.remove('hidden');
+        return;
+      }
+
+      const age = +document.getElementById('settingsAge').value;
+      const heightFt = +document.getElementById('settingsHeightFt').value;
+      const heightIn = +document.getElementById('settingsHeightIn').value;
+      const weight = +document.getElementById('settingsWeight').value;
+      const theme = document.getElementById('settingsTheme').value;
+      const errorDiv = document.getElementById('settingsError');
+      const successDiv = document.getElementById('settingsSuccess');
+
+      if (!age || !heightFt || !weight) {
+        errorDiv.textContent = 'Please fill in all fields';
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+        return;
+      }
+
+      try {
+        const bmr = calcBMR(age, weight, heightFt, heightIn);
+        userProfile = { ...userProfile, age, heightFt, heightIn, weight, bmr };
+        currentTheme = theme;
+        
+        await db.collection('users').doc(currentUser.uid).update(userProfile);
+        
+                 // Update BMR calculation
+         renderBMR(age, weight, heightFt, heightIn);
+         
+        // Apply theme
+        applyTheme(theme);
+        
+        // Reinitialize mobile layout to prevent breaking
+        reinitializeMobileLayout();
+        
+        errorDiv.classList.add('hidden');
+        successDiv.textContent = 'Settings saved successfully!';
+        successDiv.classList.remove('hidden');
+        
+        setTimeout(() => {
+          successDiv.classList.add('hidden');
+          hideSettings();
+        }, 2000);
+      } catch (error) {
+        errorDiv.textContent = error.message;
+        errorDiv.classList.remove('hidden');
+        successDiv.classList.add('hidden');
+      }
+    });
+
+         // ===== Logout =====
+     document.getElementById('logoutBtn').addEventListener('click', () => {
+       auth.signOut();
+     });
+
+     // ===== Delete Account =====
+     document.getElementById('deleteAccountBtn').addEventListener('click', async () => {
+       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+         try {
+           await db.collection('users').doc(currentUser.uid).delete();
+           await currentUser.delete();
+           auth.signOut();
+         } catch (error) {
+           console.error('Error deleting account:', error);
+           alert('Error deleting account. Please try again.');
+         }
+       }
+     });
+
+     // ===== Weight Logging Modal Event Listeners =====
+     document.getElementById('submitDailyWeight').addEventListener('click', async () => {
+       const weight = Number(document.getElementById('dailyWeight').value);
+       const errorDiv = document.getElementById('weightLoggingError');
+       
+       if (!weight || weight <= 0) {
+         errorDiv.textContent = 'Please enter a valid weight';
+         errorDiv.classList.remove('hidden');
+         return;
+       }
+       
+       try {
+         const today = todayStr();
+         
+         // Update user profile with new weight
+         if (userProfile) {
+           userProfile.weight = weight;
+           userProfile.bmr = calcBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Save updated profile to Firebase
+           await db.collection('users').doc(currentUser.uid).update(userProfile);
+           
+                    // Update BMR calculation for today
+         renderBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+         
+         // Update settings modal if it's open
+         const settingsWeightInput = document.getElementById('settingsWeight');
+         if (settingsWeightInput) {
+           settingsWeightInput.value = weight;
+         }
+         }
+         
+         // Add weight to tracking data
+         addWeightForDate(weight, today);
+         hideWeightLoggingModal();
+         errorDiv.classList.add('hidden');
+         
+         // Reset mobile container to prevent "pushed up" state
+         resetMobileContainer();
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+       }
+     });
+
+     document.getElementById('maybeLaterWeight').addEventListener('click', () => {
+       hideWeightLoggingModal();
+     });
+
+     document.getElementById('closeWeightModal').addEventListener('click', () => {
+       const today = todayStr();
+       weightLoggingClosed[today] = true;
+       saveUserData();
+       hideWeightLoggingModal();
+     });
+
+     // ===== Add Weight Modal Event Listeners =====
+     document.getElementById('addWeightBtn').addEventListener('click', showAddWeightModal);
+     document.getElementById('cancelAddWeight').addEventListener('click', hideAddWeightModal);
+     document.getElementById('submitAddWeight').addEventListener('click', async () => {
+       const weight = Number(document.getElementById('weightAmount').value);
+       const date = document.getElementById('weightDate').value;
+       const errorDiv = document.getElementById('addWeightError');
+       const successDiv = document.getElementById('addWeightSuccess');
+       
+       if (!weight || !date) {
+         errorDiv.textContent = 'Please fill in all fields';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       if (weight <= 0) {
+         errorDiv.textContent = 'Please enter a valid weight';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       try {
+         addWeightForDate(weight, date);
+         
+         // If this is today's weight, update the user profile
+         const today = todayStr();
+         if (date === today && userProfile) {
+           userProfile.weight = weight;
+           userProfile.bmr = calcBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Save updated profile to Firebase
+           await db.collection('users').doc(currentUser.uid).update(userProfile);
+           
+           // Update BMR calculation for today
+           renderBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
+           
+           // Update settings modal if it's open
+           const settingsWeightInput = document.getElementById('settingsWeight');
+           if (settingsWeightInput) {
+             settingsWeightInput.value = weight;
+           }
+         }
+         
+         errorDiv.classList.add('hidden');
+         successDiv.textContent = 'Weight logged successfully!';
+         successDiv.classList.remove('hidden');
+         
+         setTimeout(() => {
+           hideAddWeightModal();
+           // Reset mobile container to prevent "pushed up" state
+           resetMobileContainer();
+         }, 1500);
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+       }
+     });
+
+    // ===== Data Management =====
+         async function loadUserData() {
+       if (!currentUser) return;
+
+       try {
+         // Load user's progress data
+         const progressDoc = await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').get();
+         if (progressDoc.exists) {
+           const data = progressDoc.data();
+           console.log('Loading user data from Firebase:', data);
+           
+           basalByDate = data.basalByDate || {};
+           activityByDate = data.activityByDate || {};
+           weightByDate = data.weightByDate || {};
+           workoutDataByDate = data.workoutDataByDate || {};
+           foodDataByDate = data.foodDataByDate || {};
+           customFoods = data.customFoods || {};
+           weightLoggingClosed = data.weightLoggingClosed || {};
+           currentTheme = data.currentTheme || 'dark';
+           
+           console.log('Loaded workoutDataByDate:', workoutDataByDate);
+           
+           // Load streak data if it exists
+           if (data.streakData) {
+             streakData = { ...streakData, ...data.streakData };
+             // Convert workoutDates back to Set if it exists
+             if (data.streakData.workoutDates) {
+               streakData.workoutDates = new Set(data.streakData.workoutDates);
+             }
+           }
+           
+           // Recalculate streaks after loading data to ensure accuracy
+           console.log('About to recalculate streaks...');
+           calculateStreaks();
+           console.log('Streaks calculated, updating display...');
+           updateStreakDisplay();
+           
+           // Check if user is new and hide swipe hint if they have workouts
+           checkAndHideSwipeHint();
+           
+           updateCharts();
+         }
+
+                  // Calculate and display BMR from user profile
+         if (userProfile) {
+           renderBMR(userProfile.age, userProfile.weight, userProfile.heightFt, userProfile.heightIn);
+         }
+
+         // Load workout charts with saved data
+         loadTreadmillChart();
+         loadStairsChart();
+
+         // Update food menu with custom foods
+         updateFoodMenu();
+         
+         // Apply current theme
+         applyTheme(currentTheme);
+
+         // Check for daily weight logging only if user has a profile
+         if (userProfile) {
+           checkDailyWeightLogging();
+         }
+       } catch (error) {
+         console.error('Error loading user data:', error);
+       }
+     }
+
+         async function saveUserData() {
+       if (!currentUser) return;
+
+       try {
+         // Convert Set to Array for Firebase storage
+         const streakDataForStorage = {
+           ...streakData,
+           workoutDates: Array.from(streakData.workoutDates)
+         };
+         
+         await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
+           basalByDate,
+           activityByDate,
+           weightByDate,
+           workoutDataByDate,
+           foodDataByDate,
+           customFoods,
+           weightLoggingClosed,
+           currentTheme,
+           streakData: streakDataForStorage,
+           lastUpdated: new Date()
+         });
+       } catch (error) {
+         console.error('Error saving user data:', error);
+       }
+     }
+
+         // ===== Helper Functions =====
+     function todayStr(){return new Date().toISOString().split('T')[0];}
+     
+     // ===== Streak Functions =====
+    function calculateStreaks() {
+      const today = todayStr();
+      console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
+      
+      const workoutDates = Object.keys(workoutDataByDate).filter(date => {
+        const day = workoutDataByDate[date];
+        const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
+        const hasStairs = day.stairs && day.stairs.calories > 0;
+        console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
+        return hasTreadmill || hasStairs;
+      }).sort();
+      
+      console.log('Filtered workout dates:', workoutDates);
+      
+      if (workoutDates.length === 0) {
+        streakData.currentStreak = 0;
+        streakData.bestStreak = 0;
+        streakData.totalWorkouts = 0;
+        streakData.averageStreak = 0;
+        streakData.lastWorkoutDate = null;
+        streakData.workoutDates = new Set();
+        streakData.completedStreaks = [];
+        return;
+      }
+      
+      // Calculate total workouts
+      streakData.totalWorkouts = workoutDates.length;
+      streakData.lastWorkoutDate = workoutDates[workoutDates.length - 1];
+      streakData.workoutDates = new Set(workoutDates);
+      
+      // Calculate all individual streaks
+      const allStreaks = [];
+      let tempStreak = 0;
+      
+      for (let i = 0; i < workoutDates.length; i++) {
+        if (i === 0) {
+          tempStreak = 1;
+        } else {
+          const prevDate = new Date(workoutDates[i - 1]);
+          const currDate = new Date(workoutDates[i]);
+          const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
+          
+          if (diffDays === 1) {
+            tempStreak++;
+          } else {
+            // Streak ended, add to completed streaks if it's > 1 day
+            if (tempStreak > 1) {
+              allStreaks.push(tempStreak);
+            }
+            tempStreak = 1;
+          }
+        }
+      }
+      
+      // Add the last streak if it's > 1 day
+      if (tempStreak > 1) {
+        allStreaks.push(tempStreak);
+      }
+      
+      // Calculate current streak
+      let currentStreak = 0;
+      let currentDate = new Date(today);
+      
+      // Check if user worked out today
+      if (workoutDates.includes(today)) {
+        currentStreak = 1;
+        currentDate.setDate(currentDate.getDate() - 1);
+        
+        // Count backwards to find consecutive days
+        while (true) {
+          const checkDate = currentDate.toISOString().split('T')[0];
+          if (workoutDates.includes(checkDate)) {
+            currentStreak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          } else {
+            break;
+          }
+        }
+      } else {
+        // Check if user worked out yesterday
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        if (workoutDates.includes(yesterdayStr)) {
+          // Count backwards from yesterday
+          currentStreak = 1;
+          currentDate.setDate(currentDate.getDate() - 2);
+          
+          while (true) {
+            const checkDate = currentDate.toISOString().split('T')[0];
+            if (workoutDates.includes(checkDate)) {
+              currentStreak++;
+              currentDate.setDate(currentDate.getDate() - 1);
+            } else {
+              break;
+            }
+          }
+        } else {
+          currentStreak = 0;
+        }
+      }
+      
+      streakData.currentStreak = currentStreak;
+      
+      // Calculate best streak
+      const bestStreak = allStreaks.length > 0 ? Math.max(...allStreaks) : 0;
+      streakData.bestStreak = bestStreak;
+      
+      // Calculate average streak (including current streak if it's > 1 day)
+      const streaksForAverage = [...allStreaks];
+      if (currentStreak > 1) {
+        streaksForAverage.push(currentStreak);
+      }
+      
+      if (streaksForAverage.length > 0) {
+        streakData.averageStreak = Math.round((streaksForAverage.reduce((sum, streak) => sum + streak, 0) / streaksForAverage.length) * 10) / 10;
+      } else {
+        streakData.averageStreak = 0;
+      }
+      
+      // Update completed streaks for Firebase storage
+      streakData.completedStreaks = allStreaks;
+      
+      // Check if a streak just ended and save it
+      checkAndSaveCompletedStreak();
+    }
+    
+    // Function to detect when a streak ends and save the completed streak length
+    function checkAndSaveCompletedStreak() {
+      // This function will be called after calculateStreaks to check if a streak just ended
+      // and save the completed streak length to Firebase
+      
+      // Get the previous streak data from localStorage to compare
+      const previousStreakData = JSON.parse(localStorage.getItem('previousStreakData') || '{}');
+      
+      // If we had a current streak before and now it's 0, a streak just ended
+      if (previousStreakData.currentStreak > 0 && streakData.currentStreak === 0) {
+        console.log(`Streak ended! Length was: ${previousStreakData.currentStreak} days`);
+        
+        // Add the completed streak to the completedStreaks array
+        if (previousStreakData.currentStreak > 1) {
+          streakData.completedStreaks.push(previousStreakData.currentStreak);
+          
+          // Recalculate average streak
+          const streaksForAverage = [...streakData.completedStreaks];
+          if (streakData.currentStreak > 1) {
+            streaksForAverage.push(streakData.currentStreak);
+          }
+          
+          if (streaksForAverage.length > 0) {
+            streakData.averageStreak = Math.round((streaksForAverage.reduce((sum, streak) => sum + streak, 0) / streaksForAverage.length) * 10) / 10;
+          }
+          
+          // Save updated data to Firebase
+          saveUserData();
+        }
+      }
+      
+      // Save current streak data for next comparison
+      localStorage.setItem('previousStreakData', JSON.stringify({
+        currentStreak: streakData.currentStreak,
+        completedStreaks: [...streakData.completedStreaks]
+      }));
+    }
+     
+     function checkAndHideSwipeHint() {
+       // Hide swipe hint if user has logged any workouts
+       if (streakData.totalWorkouts > 0) {
+         const swipeHint = document.querySelector('.swipe-hint');
+         if (swipeHint) {
+           swipeHint.style.display = 'none';
+         }
+       }
+     }
+     
+     function updateStreakDisplay() {
+       console.log('updateStreakDisplay called, streakData:', streakData);
+       
+       // Check if user is new (no workouts logged) and hide swipe hint if they have workouts
+       checkAndHideSwipeHint();
+       
+       // Update mobile streak display
+       const mobileStreakCount = document.getElementById('mobileStreakCount');
+       const mobileBestStreak = document.getElementById('mobileBestStreak');
+       const mobileAverageStreak = document.getElementById('mobileAverageStreak');
+       const mobileStreakBar = document.getElementById('mobileStreakBar');
+       
+       console.log('Mobile elements found:', {
+         mobileStreakCount: !!mobileStreakCount,
+         mobileBestStreak: !!mobileBestStreak,
+         mobileAverageStreak: !!mobileAverageStreak,
+         mobileStreakBar: !!mobileStreakBar
+       });
+       
+       if (mobileStreakCount) {
+         console.log(`Setting mobile streak count to: ${streakData.currentStreak}`);
+         mobileStreakCount.textContent = streakData.currentStreak;
+         mobileBestStreak.textContent = streakData.bestStreak;
+         mobileAverageStreak.textContent = streakData.averageStreak;
+         
+         // Update progress bar (max at 30 days for visual appeal)
+         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         mobileStreakBar.style.width = progressPercent + '%';
+         
+        // Update mobile icons based on streak
+        const mobileFireIcon = document.querySelector('.streak-icon .animated-fire');
+        
+        // Always show the fire icon
+        if (mobileFireIcon) mobileFireIcon.style.display = 'block';
+       }
+       
+       // Update desktop streak display
+       const desktopStreakCount = document.getElementById('desktopStreakCount');
+       const desktopBestStreak = document.getElementById('desktopBestStreak');
+       const desktopAverageStreak = document.getElementById('desktopAverageStreak');
+       const desktopCurrentWeek = document.getElementById('desktopCurrentWeek');
+       const desktopStreakBar = document.getElementById('desktopStreakBar');
+       
+       console.log('Desktop elements found:', {
+         desktopStreakCount: !!desktopStreakCount,
+         desktopBestStreak: !!desktopBestStreak,
+         desktopAverageStreak: !!desktopAverageStreak,
+         desktopCurrentWeek: !!desktopCurrentWeek,
+         desktopStreakBar: !!desktopStreakBar
+       });
+       
+       if (desktopStreakCount) {
+         console.log(`Setting desktop streak count to: ${streakData.currentStreak}`);
+         desktopStreakCount.textContent = streakData.currentStreak;
+         desktopBestStreak.textContent = streakData.bestStreak;
+         desktopAverageStreak.textContent = streakData.averageStreak;
+         
+         // Calculate workouts this week
+         const today = new Date();
+         const weekStart = new Date(today);
+         weekStart.setDate(today.getDate() - today.getDay());
+         const weekStartStr = weekStart.toISOString().split('T')[0];
+         
+         let weekWorkouts = 0;
+         for (let i = 0; i < 7; i++) {
+           const checkDate = new Date(weekStart);
+           checkDate.setDate(weekStart.getDate() + i);
+           const checkDateStr = checkDate.toISOString().split('T')[0];
+           
+           if (streakData.workoutDates.has(checkDateStr)) {
+             weekWorkouts++;
+           }
+         }
+         
+         desktopCurrentWeek.textContent = weekWorkouts;
+         
+         // Update progress bar
+         const progressPercent = Math.min((streakData.currentStreak / 30) * 100, 100);
+         desktopStreakBar.style.width = progressPercent + '%';
+         
+        // Update desktop icons based on streak
+        const desktopFireIcon = document.querySelector('.streak-icon-large .animated-fire-large');
+        
+        // Always show the fire icon
+        if (desktopFireIcon) desktopFireIcon.style.display = 'block';
+       }
+     }
+
+     // ===== Weight Tracking Functions =====
+     function checkDailyWeightLogging() {
+       const today = todayStr();
+       
+       // Don't show if already logged or closed for today
+       if (weightByDate[today] || weightLoggingClosed[today]) {
+         return;
+       }
+       
+       // Show weight logging modal
+       showWeightLoggingModal();
+     }
+
+     function showWeightLoggingModal() {
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.classList.remove('hidden');
+     }
+
+     function hideWeightLoggingModal() {
+       const weightLoggingModal = document.getElementById('weightLoggingModal');
+       weightLoggingModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showAddWeightModal() {
+       const today = new Date().toISOString().split('T')[0];
+       document.getElementById('weightDate').value = today;
+       document.getElementById('weightAmount').value = '';
+       
+       // Clear any previous messages
+       document.getElementById('addWeightError').classList.add('hidden');
+       document.getElementById('addWeightSuccess').classList.add('hidden');
+       
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.classList.remove('hidden');
+     }
+
+     function hideAddWeightModal() {
+       const addWeightModal = document.getElementById('addWeightModal');
+       addWeightModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showMobileWorkoutMenu() {
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.classList.remove('hidden');
+       mobileWorkoutModal.style.zIndex = '2000';
+     }
+
+     function hideMobileWorkoutMenu() {
+       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
+       mobileWorkoutModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showMobileTreadmillModal() {
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.classList.remove('hidden');
+       mobileTreadmillModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('mobileTspeed').value = 3.5;
+       document.getElementById('mobileTgrade').value = 7.5;
+       document.getElementById('mobileTdur').value = 30;
+       previewMobileTreadmill();
+     }
+
+     function hideMobileTreadmillModal() {
+       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
+       mobileTreadmillModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showMobileStairsModal() {
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.classList.remove('hidden');
+       mobileStairsModal.style.zIndex = '2000';
+       
+       // Set default values
+       document.getElementById('mobileSdur').value = 20;
+       document.getElementById('mobileSintensity').value = '8.8';
+     }
+
+     function hideMobileStairsModal() {
+       const mobileStairsModal = document.getElementById('mobileStairsModal');
+       mobileStairsModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function showMobileFoodMenu() {
+       const mobileFoodModal = document.getElementById('mobileFoodModal');
+       mobileFoodModal.classList.remove('hidden');
+       mobileFoodModal.style.zIndex = '2000';
+     }
+
+     function hideMobileFoodMenu() {
+       const mobileFoodModal = document.getElementById('mobileFoodModal');
+       mobileFoodModal.classList.add('hidden');
+     }
+
+
+
+     function showMobileCustomFoodModal(existingFood = null) {
+       const mobileCustomFoodModal = document.getElementById('mobileCustomFoodModal');
+       mobileCustomFoodModal.classList.remove('hidden');
+       mobileCustomFoodModal.style.zIndex = '2000';
+       
+       if (existingFood) {
+         // Editing existing food
+         document.getElementById('mobileCustomFoodName').value = existingFood.name;
+         document.getElementById('mobileCustomFoodCalories').value = existingFood.calories;
+         document.getElementById('customFoodIcon').textContent = existingFood.icon;
+         document.getElementById('mobileCustomFoodCalc').textContent = 'Add Food Calories';
+         
+         // Store the original food name for updating
+         mobileCustomFoodModal.dataset.originalName = existingFood.name;
+       } else {
+         // Adding new food
+         document.getElementById('mobileCustomFoodName').value = '';
+         document.getElementById('mobileCustomFoodCalories').value = '';
+         document.getElementById('customFoodIcon').textContent = '🍽️';
+         document.getElementById('mobileCustomFoodCalc').textContent = 'Add Food';
+         delete mobileCustomFoodModal.dataset.originalName;
+       }
+       document.getElementById('mobileCustomFoodResult').innerHTML = '';
+     }
+
+     function hideMobileCustomFoodModal() {
+       const mobileCustomFoodModal = document.getElementById('mobileCustomFoodModal');
+       mobileCustomFoodModal.classList.add('hidden');
+     }
+
+     function updateCustomFoodIcon() {
+       const foodName = document.getElementById('mobileCustomFoodName').value;
+       const icon = pickEmoji(foodName);
+       document.getElementById('customFoodIcon').textContent = icon;
+     }
+
+     function updateFoodMenu() {
+       const foodMenu = document.getElementById('mobileFoodModal');
+       const menuGrid = foodMenu.querySelector('.menu-grid');
+       
+       // Check if user has any custom foods
+       const customFoodsArray = Object.values(customFoods);
+       
+       if (customFoodsArray.length === 0) {
+         // Show empty state message
+         menuGrid.innerHTML = `
+           <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: var(--muted);">
+             <div style="font-size: 48px; margin-bottom: 16px;">🍽️</div>
+             <div style="font-size: 16px; margin-bottom: 8px;">You have no recorded food items</div>
+             <div style="font-size: 14px;">Add some below!</div>
+           </div>
+         `;
+       } else {
+         // Show custom foods
+         let menuHTML = '';
+         customFoodsArray.forEach(food => {
+           menuHTML += `
+             <div class="menu-tile" id="mobileOpenCustom_${food.name.replace(/\s+/g, '_')}">
+               <div class="menu-emoji">${food.icon}</div>
+               <div>${food.name}</div>
+             </div>
+           `;
+         });
+         
+         menuGrid.innerHTML = menuHTML;
+         
+         // Re-attach event listeners for custom foods
+         customFoodsArray.forEach(food => {
+           const elementId = `mobileOpenCustom_${food.name.replace(/\s+/g, '_')}`;
+           const element = document.getElementById(elementId);
+           if (element) {
+             element.addEventListener('click', () => {
+               hideMobileFoodMenu();
+               showMobileCustomFoodModal(food);
+             });
+           }
+         });
+       }
+     }
+
+
+
+     function previewMobileTreadmill() {
+       const w = userProfile?.weight || 170;
+       const s = +document.getElementById('mobileTspeed').value;
+       const g = +document.getElementById('mobileTgrade').value;
+       const m = +document.getElementById('mobileTdur').value;
+       
+       if (w > 0 && s > 0 && g >= 0 && m > 0) {
+         const total = calcTreadmillKcal(w, s, g, m);
+         document.getElementById('mobileTresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+       } else {
+         document.getElementById('mobileTresult').innerHTML = '';
+       }
+     }
+
+     function addWeightForDate(weight, date) {
+       weightByDate[date] = weight;
+       console.log('Weight added for date:', date, 'weight:', weight);
+       console.log('Current weightByDate:', weightByDate);
+       updateCharts();
+       saveUserData();
+     }
+    function mphToMmin(mph){return mph*26.8224}
+    function calcTreadmillKcal(lbs,mph,gradePct,minutes){
+      const kg=lbs/2.2046;const speed=mphToMmin(mph);const grade=gradePct/100;
+      const vo2=0.1*speed+1.8*speed*grade+3.5;
+      const kcalPerMin=(vo2*kg)/200;return kcalPerMin*minutes;
+    }
+    function calcStairKcal(lbs, minutes, met){
+      const kg=lbs/2.2046;const kcalPerMin=(met*3.5*kg)/200;return kcalPerMin*minutes;
+    }
+
+         // ===== State =====
+     let bmr=0;
+     let basalByDate={};     // date -> BMR for that date
+     let activityByDate={};  // date -> sum of activity kcal for that date
+     let weightByDate={};    // date -> weight for that date
+     let workoutDataByDate={}; // date -> workout data for that date
+     let foodDataByDate={};  // date -> food data for that date
+     let customFoods={};     // custom food name -> {name, calories, icon}
+     let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
+     let currentTheme = 'dark'; // current theme setting
+     
+     // ===== Streak Tracking =====
+    let streakData = {
+      currentStreak: 0,
+      bestStreak: 0,
+      totalWorkouts: 0,
+      averageStreak: 0,
+      lastWorkoutDate: null,
+      workoutDates: new Set(),
+      completedStreaks: [] // Array to store individual streak lengths
+    };
+
+         // ===== Theme Management =====
+     function applyTheme(theme) {
+       const root = document.documentElement;
+       if (theme === 'light') {
+         root.style.setProperty('--bg', '#ffffff');
+         root.style.setProperty('--card', '#f8f9fa');
+         root.style.setProperty('--muted', '#6c757d');
+         root.style.setProperty('--text', '#212529');
+       } else {
+         root.style.setProperty('--bg', '#0b0f14');
+         root.style.setProperty('--card', '#121821');
+         root.style.setProperty('--muted', '#8aa0b4');
+         root.style.setProperty('--text', '#e9f0f6');
+       }
+     }
+
+    // ===== BMR =====
+    function toKg(lbs){return lbs/2.2046}
+    function toCm(ft,inch){return ft*30.48+inch*2.54}
+    function calcBMR(age,lbs,ft,inch){
+      const kg=toKg(lbs),cm=toCm(ft,inch);
+      return 10*kg+6.25*cm-5*age+5;
+    }
+    function setBasalForToday(value){
+      basalByDate[todayStr()]=Math.round(value);
+      updateCharts();
+      saveUserData();
+    }
+    function addActivityForToday(value){
+      const d=todayStr();
+      if(!activityByDate[d]) activityByDate[d]=0;
+      activityByDate[d]+=Math.round(value);
+      updateCharts();
+      saveUserData();
+    }
+         function renderBMR(age,lbs,ft,inch){
+       bmr=Math.round(calcBMR(age,lbs,ft,inch));
+       setBasalForToday(bmr); // auto include BMR in daily total for the day
+     }
+
+         // BMR calculation is now handled automatically from user profile
+
+         // ===== Charts =====
+     let totalCtx=document.getElementById('totalChart').getContext('2d');
+     let totalChart=new Chart(totalCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+     // Mobile Charts
+     let mobileTotalCtx=document.getElementById('mobileTotalChart').getContext('2d');
+     let mobileTotalChart=new Chart(mobileTotalCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Calorie Deficit',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+         let weightCtx=document.getElementById('weightChart').getContext('2d');
+     let weightChart=new Chart(weightCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+     });
+
+     let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
+     let mobileWeightChart=new Chart(mobileWeightCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9},
+         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+     });
+
+     let workoutCtx=document.getElementById('workoutChart').getContext('2d');
+     let workoutChart=new Chart(workoutCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+     let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
+     let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+     // Mobile Food Chart
+     let mobileFoodCtx=document.getElementById('mobileFoodChart').getContext('2d');
+     let mobileFoodChart=new Chart(mobileFoodCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Food Calories',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+     });
+
+                  function getAllDates(){
+           const set = new Set([
+             ...Object.keys(basalByDate || {}),
+             ...Object.keys(activityByDate || {}),
+             ...Object.keys(foodDataByDate || {}),
+             ...Object.keys(workoutDataByDate || {})
+           ]);
+           return Array.from(set).sort();
+         }
+
+         function computeFoodCaloriesForDate(d){
+           const day = foodDataByDate?.[d] || {};
+           let total = 0;
+           for (const k of Object.keys(day)) {
+             const item = day[k] || {};
+             const qty = Number(item.quantity ?? 1);
+             const fromTotal = Number(item.totalCalories);
+             const fromParts = Number(item.calories) * qty;
+             const add = !isNaN(fromTotal) ? fromTotal : (!isNaN(fromParts) ? fromParts : 0);
+             total += add;
+           }
+           return Math.round(total);
+         }
+
+     // ===== Mobile Swipe Navigation =====
+     let currentSlide = 0;
+     const totalSlides = 4;
+     let startX = 0;
+     let currentX = 0;
+     let isDragging = false;
+     let swipeCount = 0;
+
+     function showSlide(slideIndex) {
+       // Hide all slides first
+       for (let i = 0; i < totalSlides; i++) {
+         const slide = document.getElementById(`mobile-slide-${i + 1}`);
+         const indicator = document.querySelectorAll('.mobile-indicator')[i];
+         
+         slide.classList.remove('active', 'prev', 'next');
+         slide.style.display = 'none';
+         slide.style.transform = '';
+         slide.style.opacity = '';
+         indicator.classList.remove('active');
+       }
+
+       // Show current slide
+       const currentSlideElement = document.getElementById(`mobile-slide-${slideIndex + 1}`);
+       const currentIndicator = document.querySelectorAll('.mobile-indicator')[slideIndex];
+       
+       currentSlideElement.style.display = 'flex';
+       currentSlideElement.classList.add('active');
+       currentIndicator.classList.add('active');
+
+       // Set previous slide for swipe animation
+       const prevIndex = slideIndex === 0 ? totalSlides - 1 : slideIndex - 1;
+       const prevSlide = document.getElementById(`mobile-slide-${prevIndex + 1}`);
+       prevSlide.style.display = 'flex';
+       prevSlide.classList.add('prev');
+
+       // Set next slide for swipe animation
+       const nextIndex = slideIndex === totalSlides - 1 ? 0 : slideIndex + 1;
+       const nextSlide = document.getElementById(`mobile-slide-${nextIndex + 1}`);
+       nextSlide.style.display = 'flex';
+       nextSlide.classList.add('next');
+     }
+
+     function nextSlide() {
+       currentSlide = (currentSlide + 1) % totalSlides;
+       showSlide(currentSlide);
+       incrementSwipeCount();
+     }
+
+     function prevSlide() {
+       currentSlide = currentSlide === 0 ? totalSlides - 1 : currentSlide - 1;
+       showSlide(currentSlide);
+       incrementSwipeCount();
+     }
+     
+     function incrementSwipeCount() {
+       swipeCount++;
+       if (swipeCount >= 3) {
+         const swipeHint = document.querySelector('.swipe-hint');
+         if (swipeHint) {
+           swipeHint.style.display = 'none';
+         }
+       }
+     }
+
+     // Touch event handlers with improved sensitivity
+     let startY = 0;
+     let isVerticalScroll = false;
+     let hasMoved = false;
+     let startTime = 0;
+     let velocity = 0;
+     let lastMoveTime = 0;
+
+     function handleTouchStart(e) {
+       // Don't start swipe detection if touching a button or interactive element
+       if (e.target.tagName === 'BUTTON' || e.target.closest('button') || 
+           e.target.tagName === 'INPUT' || e.target.closest('input') ||
+           e.target.tagName === 'SELECT' || e.target.closest('select') ||
+           e.target.closest('.modal-overlay')) {
+         return;
+       }
+       
+       startX = e.touches[0].clientX;
+       startY = e.touches[0].clientY;
+       startTime = Date.now();
+       isDragging = true;
+       isVerticalScroll = false;
+       hasMoved = false;
+       velocity = 0;
+     }
+
+     function handleTouchMove(e) {
+       if (!isDragging) return;
+       
+       currentX = e.touches[0].clientX;
+       const currentY = e.touches[0].clientY;
+       const diffX = startX - currentX;
+       const diffY = startY - currentY;
+       const currentTime = Date.now();
+       
+       // Calculate velocity for momentum-based swiping
+       if (currentTime - lastMoveTime > 0) {
+         velocity = Math.abs(diffX) / (currentTime - lastMoveTime);
+       }
+       lastMoveTime = currentTime;
+       
+       // Check if we've moved enough to consider it a gesture (reduced threshold)
+       if (Math.abs(diffX) > 3 || Math.abs(diffY) > 3) {
+         hasMoved = true;
+       }
+       
+       // Determine if this is a vertical scroll or horizontal swipe
+       if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+         isVerticalScroll = true;
+         return; // Allow normal scrolling
+       }
+       
+       // Handle horizontal swipes with reduced threshold
+       if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+         e.preventDefault(); // Prevent scrolling during horizontal swipe
+         
+         // Add visual feedback for all swipes (reduced threshold)
+         const activeSlide = document.querySelector('.mobile-slide.active');
+         if (Math.abs(diffX) > 5) {
+           // Add smooth transition during swipe
+           activeSlide.style.transition = 'none';
+           activeSlide.style.transform = `translateX(${-diffX}px)`;
+           
+           // Add opacity effect for better visual feedback
+           const opacity = Math.max(0.7, 1 - Math.abs(diffX) / 200);
+           activeSlide.style.opacity = opacity;
+         }
+       }
+     }
+
+     function handleTouchEnd(e) {
+       if (!isDragging || isVerticalScroll || !hasMoved) {
+         // Reset any transforms
+         const activeSlide = document.querySelector('.mobile-slide.active');
+         if (activeSlide) {
+           activeSlide.style.transform = '';
+           activeSlide.style.opacity = '';
+           activeSlide.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+         }
+         
+         isDragging = false;
+         isVerticalScroll = false;
+         hasMoved = false;
+         return;
+       }
+       
+       isDragging = false;
+       const diff = startX - currentX;
+       const timeDiff = Date.now() - startTime;
+       
+       // Dynamic threshold based on velocity and distance
+       let threshold = 50; // Reduced base threshold
+       
+       // If swipe is fast (high velocity), reduce threshold
+       if (velocity > 0.5) {
+         threshold = 30;
+       }
+       
+       // If swipe is very fast, make it even more sensitive
+       if (velocity > 1.0) {
+         threshold = 20;
+       }
+       
+       // Reset transform with smooth transition
+       const activeSlide = document.querySelector('.mobile-slide.active');
+       if (activeSlide) {
+         activeSlide.style.transition = 'transform 0.3s ease-in-out, opacity 0.3s ease-in-out';
+         activeSlide.style.transform = '';
+         activeSlide.style.opacity = '';
+       }
+       
+       // Check if swipe meets threshold or has high velocity
+       if (Math.abs(diff) > threshold || velocity > 0.8) {
+         if (diff > 0) {
+           // Swipe left - next slide
+           nextSlide();
+         } else {
+           // Swipe right - previous slide
+           prevSlide();
+         }
+       }
+       
+       hasMoved = false;
+       velocity = 0;
+     }
+
+     // Keyboard shortcut handler
+     function handleKeyboardShortcuts(e) {
+       // Arrow keys for navigation
+       if (e.key === 'ArrowLeft') {
+         e.preventDefault();
+         prevSlide();
+       } else if (e.key === 'ArrowRight') {
+         e.preventDefault();
+         nextSlide();
+       }
+       // Ctrl+Shift for quick navigation
+       else if (e.ctrlKey && e.shiftKey) {
+         e.preventDefault();
+         nextSlide();
+       }
+     }
+
+     // Initialize mobile swipe with improved event handling
+     function initMobileSwipe() {
+       const mobileContainer = document.querySelector('.mobile-container');
+       if (mobileContainer) {
+         // Use passive: false for better control over touch events
+         mobileContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+         mobileContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+         mobileContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+         
+         // Add mouse events for desktop testing
+         mobileContainer.addEventListener('mousedown', (e) => {
+           if (e.button === 0) { // Left mouse button only
+             startX = e.clientX;
+             startY = e.clientY;
+             startTime = Date.now();
+             isDragging = true;
+             isVerticalScroll = false;
+             hasMoved = false;
+             velocity = 0;
+           }
+         });
+         
+         mobileContainer.addEventListener('mousemove', (e) => {
+           if (!isDragging) return;
+           
+           currentX = e.clientX;
+           const currentY = e.clientY;
+           const diffX = startX - currentX;
+           const diffY = startY - currentY;
+           const currentTime = Date.now();
+           
+           if (currentTime - lastMoveTime > 0) {
+             velocity = Math.abs(diffX) / (currentTime - lastMoveTime);
+           }
+           lastMoveTime = currentTime;
+           
+           if (Math.abs(diffX) > 3 || Math.abs(diffY) > 3) {
+             hasMoved = true;
+           }
+           
+           if (!isVerticalScroll && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 8) {
+             isVerticalScroll = true;
+             return;
+           }
+           
+           if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 8) {
+             const activeSlide = document.querySelector('.mobile-slide.active');
+             if (Math.abs(diffX) > 5) {
+               activeSlide.style.transition = 'none';
+               activeSlide.style.transform = `translateX(${-diffX}px)`;
+               const opacity = Math.max(0.7, 1 - Math.abs(diffX) / 200);
+               activeSlide.style.opacity = opacity;
+             }
+           }
+         });
+         
+         mobileContainer.addEventListener('mouseup', (e) => {
+           if (isDragging) {
+             handleTouchEnd(e);
+           }
+         });
+         
+         mobileContainer.addEventListener('mouseleave', (e) => {
+           if (isDragging) {
+             handleTouchEnd(e);
+           }
+         });
+       }
+       
+       // Add click functionality to indicators
+       const indicators = document.querySelectorAll('.mobile-indicator');
+       indicators.forEach((indicator, index) => {
+         indicator.addEventListener('click', () => {
+           currentSlide = index;
+           showSlide(index);
+           incrementSwipeCount();
+         });
+       });
+       
+       // Add keyboard event listener
+       document.addEventListener('keydown', handleKeyboardShortcuts);
+       
+       // Fix mobile viewport height issues
+       fixMobileViewport();
+     }
+     
+     function fixMobileViewport() {
+       // Set CSS custom property for real viewport height
+       const setVH = () => {
+         const vh = window.innerHeight * 0.01;
+         document.documentElement.style.setProperty('--vh', `${vh}px`);
+       };
+       
+       // Set initial value
+       setVH();
+       
+       // Update on resize and orientation change
+       window.addEventListener('resize', () => {
+         setVH();
+         fixMobileSlideCentering(); // Fix centering on resize
+         fixStreakModulePositioning(); // Fix streak positioning on resize
+       });
+       window.addEventListener('orientationchange', () => {
+         setTimeout(() => {
+           setVH();
+           fixMobileSlideCentering(); // Fix centering on orientation change
+           fixStreakModulePositioning(); // Fix streak positioning on orientation change
+         }, 100); // Delay to ensure proper height calculation
+       });
+     }
+
+     // Fix mobile slide centering issues
+     function fixMobileSlideCentering() {
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       mobileSlides.forEach(slide => {
+         // Reset any existing transforms that might cause centering issues
+         slide.style.left = '0';
+         slide.style.right = '0';
+         slide.style.marginLeft = 'auto';
+         slide.style.marginRight = 'auto';
+         slide.style.transform = slide.classList.contains('active') ? 'translateX(0)' : 
+                                 slide.classList.contains('prev') ? 'translateX(-100%)' : 
+                                 slide.classList.contains('next') ? 'translateX(100%)' : 'translateX(0)';
+         
+         // Ensure proper centering for slide content
+         const slideContent = slide.querySelector('.mobile-slide-content');
+         if (slideContent) {
+           slideContent.style.marginLeft = 'auto';
+           slideContent.style.marginRight = 'auto';
+           slideContent.style.maxWidth = '100%';
+         }
+       });
+       
+       console.log('Mobile slide centering fixed');
+     }
+
+     // Aggressive centering fix for users with cached centering issues
+     function forceMobileSlideCentering() {
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       const mobileContainer = document.querySelector('.mobile-container');
+       
+       // Reset container
+       if (mobileContainer) {
+         mobileContainer.style.left = '0';
+         mobileContainer.style.right = '0';
+         mobileContainer.style.marginLeft = 'auto';
+         mobileContainer.style.marginRight = 'auto';
+         mobileContainer.style.transform = '';
+       }
+       
+       // Reset all slides
+       mobileSlides.forEach(slide => {
+         slide.style.left = '0';
+         slide.style.right = '0';
+         slide.style.marginLeft = 'auto';
+         slide.style.marginRight = 'auto';
+         slide.style.position = 'absolute';
+         slide.style.width = '100%';
+         
+         // Reset transforms based on current state
+         if (slide.classList.contains('active')) {
+           slide.style.transform = 'translateX(0)';
+         } else if (slide.classList.contains('prev')) {
+           slide.style.transform = 'translateX(-100%)';
+         } else if (slide.classList.contains('next')) {
+           slide.style.transform = 'translateX(100%)';
+         } else {
+           slide.style.transform = 'translateX(0)';
+         }
+         
+         // Reset slide content
+         const slideContent = slide.querySelector('.mobile-slide-content');
+         if (slideContent) {
+           slideContent.style.marginLeft = 'auto';
+           slideContent.style.marginRight = 'auto';
+           slideContent.style.maxWidth = '100%';
+           slideContent.style.width = '100%';
+         }
+       });
+       
+       console.log('Forced mobile slide centering reset completed');
+     }
+
+    // Reinitialize mobile layout after settings changes
+    function reinitializeMobileLayout() {
+      try {
+        // Force reset all mobile slides
+        forceMobileSlideCentering();
+        
+        // Reinitialize mobile slides
+        showSlide(0);
+        
+        // Fix streak module positioning
+        fixStreakModulePositioning();
+        
+        // Reset mobile container
+        resetMobileContainer();
+        
+        console.log('Mobile layout reinitialized after settings save');
+      } catch (error) {
+        console.error('Error reinitializing mobile layout:', error);
+        // Fallback: try basic reset
+        try {
+          const mobileSlides = document.querySelectorAll('.mobile-slide');
+          mobileSlides.forEach(slide => {
+            slide.style.left = '0';
+            slide.style.right = '0';
+            slide.style.marginLeft = 'auto';
+            slide.style.marginRight = 'auto';
+            slide.style.transform = slide.classList.contains('active') ? 'translateX(0)' : 'translateX(0)';
+          });
+          showSlide(0);
+        } catch (fallbackError) {
+          console.error('Fallback mobile layout reset failed:', fallbackError);
+        }
+      }
+    }
+
+    // Detect and automatically fix broken layouts
+    function detectAndFixBrokenLayout() {
+      try {
+        const mobileSlides = document.querySelectorAll('.mobile-slide');
+        const mobileContainer = document.querySelector('.mobile-container');
+        
+        // Check if slides are misaligned (not centered)
+        let needsFix = false;
+        
+        mobileSlides.forEach(slide => {
+          const rect = slide.getBoundingClientRect();
+          const containerRect = mobileContainer ? mobileContainer.getBoundingClientRect() : { left: 0, width: window.innerWidth };
+          
+          // Check if slide is not properly centered
+          if (rect.left < containerRect.left - 50 || rect.right > containerRect.left + containerRect.width + 50) {
+            needsFix = true;
+          }
+        });
+        
+        if (needsFix) {
+          console.log('Broken layout detected, applying automatic fix...');
+          emergencyLayoutFix();
+        }
+      } catch (error) {
+        console.error('Error detecting broken layout:', error);
+      }
+    }
+
+    // Auto-fix layout on page reload for users with broken layouts
+    function autoFixLayoutOnReload() {
+      try {
+        console.log('Checking for layout issues on page load...');
+        
+        // Wait a bit for the page to fully load, then check for layout issues
+        setTimeout(() => {
+          const mobileSlides = document.querySelectorAll('.mobile-slide');
+          const mobileContainer = document.querySelector('.mobile-container');
+          
+          if (mobileSlides.length > 0 && mobileContainer) {
+            // Check if any slides are misaligned
+            let needsFix = false;
+            
+            mobileSlides.forEach(slide => {
+              const rect = slide.getBoundingClientRect();
+              const containerRect = mobileContainer.getBoundingClientRect();
+              
+              // Check if slide is not properly centered or has unusual positioning
+              if (rect.left < containerRect.left - 100 || 
+                  rect.right > containerRect.left + containerRect.width + 100 ||
+                  rect.width < containerRect.width * 0.8) {
+                needsFix = true;
+              }
+            });
+            
+            if (needsFix) {
+              console.log('Layout issues detected, applying automatic fix...');
+              emergencyLayoutFix();
+            } else {
+              console.log('Layout looks good');
+            }
+          }
+        }, 500); // Wait 500ms for page to fully load
+      } catch (error) {
+        console.error('Error in auto-fix layout on reload:', error);
+      }
+    }
+
+    // Emergency layout fix for users with broken layouts
+    function emergencyLayoutFix() {
+      try {
+        console.log('Running emergency layout fix...');
+        
+        // Reset all mobile slides
+        const mobileSlides = document.querySelectorAll('.mobile-slide');
+        mobileSlides.forEach(slide => {
+          slide.style.left = '0';
+          slide.style.right = '0';
+          slide.style.marginLeft = 'auto';
+          slide.style.marginRight = 'auto';
+          slide.style.position = 'absolute';
+          slide.style.width = '100%';
+          slide.style.transform = '';
+          slide.style.opacity = '';
+          slide.style.display = 'none';
+        });
+        
+        // Reset mobile container
+        const mobileContainer = document.querySelector('.mobile-container');
+        if (mobileContainer) {
+          mobileContainer.style.left = '0';
+          mobileContainer.style.right = '0';
+          mobileContainer.style.marginLeft = 'auto';
+          mobileContainer.style.marginRight = 'auto';
+          mobileContainer.style.transform = '';
+        }
+        
+        // Reinitialize slides
+        showSlide(0);
+        
+        console.log('Emergency layout fix completed');
+        //alert('Layout has been fixed! If you still see issues, please refresh the page.');
+      } catch (error) {
+        console.error('Emergency layout fix failed:', error);
+        //alert('Layout fix failed. Please refresh the page.');
+      }
+    }
+
+    // Make centering fix available globally for manual use
+    window.fixCentering = forceMobileSlideCentering;
+    window.fixStreakPositioning = fixStreakModulePositioning;
+    window.reinitializeMobileLayout = reinitializeMobileLayout;
+    window.emergencyLayoutFix = emergencyLayoutFix;
+
+     // Fix streak module positioning for consistent spacing
+     function fixStreakModulePositioning() {
+       const streakModule = document.querySelector('.streak-module');
+       const streakContainer = document.querySelector('.mobile-slide-content');
+       
+       if (streakModule && streakContainer) {
+         // Reset streak module positioning - it's now inside mobile-slide-content
+         streakModule.style.margin = '0';
+         streakModule.style.position = 'relative';
+         streakModule.style.top = '0px';
+         
+         // Ensure the container has proper positioning
+         streakContainer.style.margin = '16px auto';
+         
+         console.log('Streak module positioned consistently with other modules');
+       }
+     }
+     
+     function resetMobileContainer() {
+       // Reset mobile container positioning to prevent "pushed up" state
+       const mobileContainer = document.querySelector('.mobile-container');
+       if (mobileContainer) {
+         mobileContainer.style.top = '';
+         mobileContainer.style.transform = '';
+         mobileContainer.style.position = '';
+       }
+       
+       // Reset all mobile slides positioning
+       const mobileSlides = document.querySelectorAll('.mobile-slide');
+       mobileSlides.forEach(slide => {
+         slide.style.top = '';
+         slide.style.transform = '';
+         slide.style.position = '';
+       });
+       
+       // Force reflow to ensure changes take effect
+       mobileContainer?.offsetHeight;
+     }
+
+         // Food icon mapping
+         const FOOD_MAP = new Map([
+           // drinks
+           ["milk","🥛"], ["glass of milk","🥛"], ["oat milk","🥛"], ["soy milk","🥛"], ["milk tea","🧋"],
+           ["water","💧"], ["juice","🧃"], ["apple juice","🧃"], ["orange juice","🧃"],
+           ["soda","🥤"], ["cola","🥤"], ["soft drink","🥤"], ["milkshake","🥤"],
+           ["coffee","☕"], ["latte","☕"], ["espresso","☕"], ["tea","🍵"], ["green tea","🍵"], ["teapot","🫖"],
+           ["boba","🧋"], ["bubble tea","🧋"], ["smoothie","🥤"],
+           ["beer","🍺"], ["beers","🍻"], ["wine","🍷"], ["champagne","🍾"], ["sake","🍶"], ["cocktail","🍸"], ["tropical drink","🍹"], ["mate","🧉"],
+
+           // mains and fast food
+           ["burger","🍔"], ["hamburger","🍔"], ["cheeseburger","🍔"],
+           ["pizza","🍕"], ["slice","🍕"],
+           ["hot dog","🌭"], ["hotdog","🌭"],
+           ["taco","🌮"], ["burrito","🌯"], ["tamale","🫔"],
+           ["sandwich","🥪"], ["wrap","🌯"], ["flatbread","🫓"],
+           ["fries","🍟"], ["french fries","🍟"], ["pizza fries","🍟"],
+           ["dumpling","🥟"], ["gyoza","🥟"], ["bao","🥟"], ["bento","🍱"], ["takeout","🥡"],
+           ["sushi","🍣"], ["ramen","🍜"], ["noodles","🍜"], ["pho","🍜"], ["spaghetti","🍝"], ["pasta","🍝"],
+           ["curry","🍛"], ["curry rice","🍛"], ["rice","🍚"], ["rice ball","🍙"], ["rice cracker","🍘"],
+           ["soup","🍲"], ["stew","🍲"], ["bowl","🥣"], ["fondue","🫕"],
+           ["bbq","🍖"], ["steak","🥩"], ["meat","🥩"], ["bacon","🥓"], ["chicken","🍗"], ["drumstick","🍗"], ["wings","🍗"],
+           ["fried shrimp","🍤"], ["shrimp","🍤"], ["lobster","🦞"], ["crab","🦀"], ["oyster","🦪"], ["canned food","🥫"],
+           ["egg","🥚"], ["omelet","🍳"], ["omelette","🍳"],
+           ["salad","🥗"], ["taco salad","🥗"],
+
+           // breads and breakfast
+           ["bread","🍞"], ["baguette","🥖"], ["croissant","🥐"], ["bagel","🥯"], ["pancakes","🥞"], ["waffle","🧇"],
+
+           // sweets
+           ["donut","🍩"], ["doughnut","🍩"], ["ice cream","🍨"], ["soft serve","🍦"], ["shaved ice","🍧"],
+           ["cake","🍰"], ["birthday cake","🎂"], ["cupcake","🧁"], ["pie","🥧"],
+           ["cookie","🍪"], ["candy","🍬"], ["lollipop","🍭"], ["chocolate","🍫"], ["honey","🍯"],
+
+           // cheese and pantry
+           ["cheese","🧀"], ["butter","🧈"], ["salt","🧂"], ["jar","🫙"],
+
+           // produce
+           ["apple","🍎"], ["green apple","🍏"], ["banana","🍌"], ["strawberry","🍓"], ["blueberries","🫐"],
+           ["grapes","🍇"], ["orange","🍊"], ["lemon","🍋"], ["pear","🍐"], ["peach","🍑"], ["mango","🥭"],
+           ["pineapple","🍍"], ["melon","🍈"], ["watermelon","🍉"], ["kiwi","🥝"], ["coconut","🥥"],
+           ["avocado","🥑"], ["tomato","🍅"], ["corn","🌽"], ["carrot","🥕"], ["potato","🥔"], ["sweet potato","🍠"],
+           ["mushroom","🍄"], ["eggplant","🍆"], ["cucumber","🥒"], ["pickle","🥒"], ["broccoli","🥦"], ["leafy greens","🥬"], ["lettuce","🥬"],
+           ["bell pepper","🫑"], ["pepper","🌶️"], ["garlic","🧄"], ["onion","🧅"], ["beans","🫘"], ["peanuts","🥜"], ["chestnut","🌰"], ["olive","🫒"],
+
+           // misc
+           ["popcorn","🍿"], ["coffee beans","☕"], ["bento box","🍱"], ["takeout box","🥡"]
+         ]);
+
+         // Food icon helper functions
+         function normalizeTerm(s) {
+           return s.toLowerCase().replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+         }
+
+         function pickEmoji(input) {
+           const hasEmoji = /\p{Extended_Pictographic}/u.test(input);
+           if (hasEmoji) {
+             // Return the first emoji char
+             const match = input.match(/\p{Extended_Pictographic}(\uFE0F\u20E3|\uFE0F|\u200D\p{Extended_Pictographic})*/u);
+             if (match) return match[0];
+           }
+           const t = normalizeTerm(input);
+           if (FOOD_MAP.has(t)) return FOOD_MAP.get(t);
+           // Try simple plural trim
+           if (t.endsWith('es') && FOOD_MAP.has(t.slice(0, -2))) return FOOD_MAP.get(t.slice(0, -2));
+           if (t.endsWith('s') && FOOD_MAP.has(t.slice(0, -1))) return FOOD_MAP.get(t.slice(0, -1));
+           // Try removing common words
+           const simplified = t.replace(/^(a|an|the)\s+/g, '').replace(/\s+emoji$/g, '');
+           if (FOOD_MAP.has(simplified)) return FOOD_MAP.get(simplified);
+           // Light fuzzy fallback
+           const keys = Array.from(FOOD_MAP.keys()).sort((a,b)=>b.length - a.length);
+           for (const k of keys) {
+             if (simplified.includes(k) || k.includes(simplified)) return FOOD_MAP.get(k);
+           }
+           return '🍽️'; // Default food emoji
+         }
+
+         // Put this helper above updateCharts()
+         function computeWeightSeries(weightByDate, futureDays = 3) {
+           // Collect actual points, sorted
+           const actualDates = Object.keys(weightByDate)
+             .filter(d => typeof weightByDate[d] === 'number' && !isNaN(weightByDate[d]))
+             .sort();
+
+           if (actualDates.length === 0) {
+             return { labels: [], actual: [], projected: [] };
+           }
+
+          // Build recent slice for trend (up to last 7 actual points)
+          const recentDates = actualDates.slice(-7);
+           const recentPoints = recentDates.map(d => ({
+             date: d,
+             ts: new Date(d).getTime(),
+             w: weightByDate[d]
+           }));
+
+           // Average daily change
+           let slopePerDay = 0;
+           if (recentPoints.length >= 2) {
+             const first = recentPoints[0];
+             const last = recentPoints[recentPoints.length - 1];
+             const days = Math.max(1, Math.round((last.ts - first.ts) / (1000 * 60 * 60 * 24)));
+             slopePerDay = (last.w - first.w) / days;
+           } // if only one point, slope remains 0
+
+           // Labels = all actual dates + next N future dates
+           const lastDate = new Date(actualDates[actualDates.length - 1]);
+           const futureLabels = [];
+           for (let i = 1; i <= futureDays; i++) {
+             const d = new Date(lastDate.getTime() + i * 24 * 60 * 60 * 1000);
+             futureLabels.push(d.toISOString().split('T')[0]);
+           }
+           const labels = [...actualDates, ...futureLabels];
+
+           // Actual values align to labels, null for future
+           const actual = labels.map(d => (weightByDate[d] ?? null));
+
+           // Projected values: null for all past labels except the last actual index,
+           // then extend using slope for future labels
+           const projected = new Array(labels.length).fill(null);
+           const lastIdx = actualDates.length - 1;
+           const lastWeight = weightByDate[actualDates[lastIdx]];
+           projected[lastIdx] = lastWeight; // anchor so the dotted line starts here
+           for (let i = 1; i <= futureDays; i++) {
+             projected[lastIdx + i] = lastWeight + slopePerDay * i;
+           }
+
+           return { labels, actual, projected };
+     }
+
+         function updateCharts(){
+           const labels = getAllDates();
+
+           // calories burned per day
+           const burned = labels.map(d => (basalByDate[d] || 0) + (activityByDate[d] || 0));
+
+           // calories eaten per day, now includes ALL foods
+           const foodCalories = labels.map(d => computeFoodCaloriesForDate(d));
+
+           // deficit = burned minus eaten
+           const deficit = labels.map((_, i) => burned[i] - foodCalories[i]);
+
+           // ----- Total chart (desktop) -----
+           totalChart.data.labels = labels;
+           const isDetailed = totalChart.data.datasets.length > 1;
+           if (isDetailed) {
+             totalChart.data.datasets[0].data = burned;       // Calories Burned
+             totalChart.data.datasets[1].data = foodCalories; // Calories Eaten
+           } else {
+             totalChart.data.datasets[0].data = deficit;      // Calorie Deficit
+           }
+           totalChart.update();
+
+           // ----- Total chart (mobile) -----
+           mobileTotalChart.data.labels = labels;
+           const isMobileDetailed = mobileTotalChart.data.datasets.length > 1;
+           if (isMobileDetailed) {
+             mobileTotalChart.data.datasets[0].data = burned;
+             mobileTotalChart.data.datasets[1].data = foodCalories;
+           } else {
+             mobileTotalChart.data.datasets[0].data = deficit;
+           }
+           mobileTotalChart.update();
+
+           // ----- Workout charts -----
+           const workoutPerDay = labels.map(d => {
+             let t = 0;
+             const w = workoutDataByDate[d];
+             // Use cumulative calories for each workout type
+             if (w?.treadmill?.calories) t += w.treadmill.calories;
+             if (w?.stairs?.calories)    t += w.stairs.calories;
+             return t;
+           });
+
+           workoutChart.data.labels = labels;
+           const isWorkoutFat = workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           workoutChart.data.datasets[0].data = isWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
+           workoutChart.update();
+
+           mobileWorkoutChart.data.labels = labels;
+           const isMobileWorkoutFat = mobileWorkoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
+           mobileWorkoutChart.update();
+
+           // ----- Food chart (mobile) -----
+           mobileFoodChart.data.labels = labels;
+           const isMobileFoodFat = mobileFoodChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+           mobileFoodChart.data.datasets[0].data = isMobileFoodFat ? foodCalories.map(v => v/3500) : foodCalories;
+           mobileFoodChart.update();
+
+           // ----- Weight charts -----
+           if (userProfile) {
+             const { labels: wLabels, actual: wActual, projected: wProjected } =
+               computeWeightSeries(weightByDate, 3);
+
+             // desktop
+             weightChart.data.labels = wLabels;
+             const isWeightFat = weightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+             if (isWeightFat) {
+               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
+               weightChart.data.datasets[0].data = perDay;
+               weightChart.data.datasets[1].data = perDay;
+             } else {
+               weightChart.data.datasets[0].data = wActual;
+               weightChart.data.datasets[1].data = wProjected;
+             }
+             weightChart.update();
+
+             // mobile
+             mobileWeightChart.data.labels = wLabels;
+             const isMobileWeightFat = mobileWeightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
+             if (isMobileWeightFat) {
+               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
+               mobileWeightChart.data.datasets[0].data = perDay;
+               mobileWeightChart.data.datasets[1].data = perDay;
+             } else {
+               mobileWeightChart.data.datasets[0].data = wActual;
+               mobileWeightChart.data.datasets[1].data = wProjected;
+             }
+             mobileWeightChart.update();
+           }
+         }
+
+    // ===== Treadmill =====
+    let tctx=document.getElementById('tchart').getContext('2d');
+    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
+
+         function treadmillInputs(){
+       return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
+     }
+
+     function saveTreadmillInputs() {
+       const inputs = treadmillInputs();
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       workoutDataByDate[today].treadmill = inputs;
+       saveUserData();
+     }
+
+     function loadTreadmillInputs() {
+       const today = todayStr();
+       if (workoutDataByDate[today] && workoutDataByDate[today].treadmill) {
+         const data = workoutDataByDate[today].treadmill;
+         tspeed.value = data.s || 3.5;
+         tgrade.value = data.g || 7.5;
+         tdur.value = data.m || 30;
+         previewTreadmill();
+       } else {
+         // Set default values if no saved data
+         tspeed.value = 3.5;
+         tgrade.value = 7.5;
+         tdur.value = 30;
+         previewTreadmill();
+       }
+     }
+
+     function loadTreadmillChart() {
+       // Clear existing chart data
+       tchart.data.labels = [];
+       tchart.data.datasets[0].data = [];
+       
+       // Load treadmill data from Firebase - shows cumulative daily totals
+       const dates = Object.keys(workoutDataByDate).sort();
+       dates.forEach(date => {
+         if (workoutDataByDate[date].treadmill && workoutDataByDate[date].treadmill.calories) {
+           tchart.data.labels.push(date);
+           tchart.data.datasets[0].data.push(workoutDataByDate[date].treadmill.calories);
+         }
+       });
+       tchart.update();
+     }
+
+     function loadStairsChart() {
+       // Clear existing chart data
+       schart.data.labels = [];
+       schart.data.datasets[0].data = [];
+       
+       // Load stairs data from Firebase - shows cumulative daily totals
+       const dates = Object.keys(workoutDataByDate).sort();
+       dates.forEach(date => {
+         if (workoutDataByDate[date].stairs && workoutDataByDate[date].stairs.calories) {
+           schart.data.labels.push(date);
+           schart.data.datasets[0].data.push(workoutDataByDate[date].stairs.calories);
+         }
+       });
+       schart.update();
+     }
+    function previewTreadmill(){
+      const {w,s,g,m}=treadmillInputs();
+      if(w>0 && s>0 && g>=0 && m>0){
+        const total=calcTreadmillKcal(w,s,g,m);
+        tresult.innerHTML=`<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+      } else {
+        tresult.innerHTML='';
+      }
+    }
+         function renderTreadmill(lbs,mph,gradePct,minutes){
+       const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
+       tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today=todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       
+       // If there's already treadmill data for today, add to it instead of replacing
+       if (workoutDataByDate[today].treadmill) {
+         workoutDataByDate[today].treadmill.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].treadmill.workouts) {
+           workoutDataByDate[today].treadmill.workouts = [];
+         }
+         workoutDataByDate[today].treadmill.workouts.push({
+           w: lbs, s: mph, g: gradePct, m: minutes,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].treadmill = {
+           w: lbs, s: mph, g: gradePct, m: minutes,
+           calories: Math.round(total),
+           workouts: [{
+             w: lbs, s: mph, g: gradePct, m: minutes,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       
+       saveUserData();
+       
+       // Update treadmill chart with cumulative total
+       loadTreadmillChart();
+       
+       // Update overall workout chart
+       updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Hide swipe hint if this is the user's first workout
+       checkAndHideSwipeHint();
+     }
+         ['input','change'].forEach(evt=>{
+       tspeed.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+       tgrade.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+       tdur.addEventListener(evt,()=>{
+         previewTreadmill();
+         saveTreadmillInputs();
+       });
+     });
+         tcalc.addEventListener('click',()=>{
+       const {w,s,g,m}=treadmillInputs();
+       if(!w||!s||!g||!m){tresult.innerHTML='<p>Please enter all values</p>';return;}
+       renderTreadmill(w,s,g,m);
+     });
+
+    // ===== Stairs =====
+    let sctx=document.getElementById('schart').getContext('2d');
+    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
+
+    sintensity.addEventListener('change',()=>{
+      const isCustom = sintensity.value==='custom';
+      document.getElementById('customMetField').classList.toggle('hidden', !isCustom);
+    });
+         function renderStairs(lbs, minutes, met){
+       const total=calcStairKcal(lbs, minutes, met);
+       sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today=todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       
+       // If there's already stairs data for today, add to it instead of replacing
+       if (workoutDataByDate[today].stairs) {
+         workoutDataByDate[today].stairs.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].stairs.workouts) {
+           workoutDataByDate[today].stairs.workouts = [];
+         }
+         workoutDataByDate[today].stairs.workouts.push({
+           w: lbs, m: minutes, met: met,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].stairs = {
+           w: lbs, m: minutes, met: met,
+           calories: Math.round(total),
+           workouts: [{
+             w: lbs, m: minutes, met: met,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       
+       saveUserData();
+       
+       // Update stairs chart with cumulative total
+       loadStairsChart();
+       
+       // Update overall workout chart
+       updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Hide swipe hint if this is the user's first workout
+       checkAndHideSwipeHint();
+     }
+         scalc.addEventListener('click',()=>{
+       const w=userProfile?.weight||170, m=+sdur.value;
+       let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
+       if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
+       renderStairs(w, m, met);
+     });
+
+    // ===== Workouts Menu Show/Hide =====
+    const workoutMenu=document.getElementById('workoutMenu');
+    const showBtn=document.getElementById('showWorkouts');
+    const toggleSection=document.getElementById('workoutToggleSection');
+
+    function setShowBtnVisible(vis){ toggleSection.style.display = vis ? '' : 'none'; }
+    function setMenuVisible(vis){ workoutMenu.classList.toggle('hidden', !vis); }
+
+         showBtn.addEventListener('click',()=>{
+       const willShow = workoutMenu.classList.contains('hidden');
+       setMenuVisible(willShow);
+       showBtn.textContent = willShow ? 'Hide Workouts' : 'Show Workouts';
+       // Hide the toggle button when workouts are shown
+       setShowBtnVisible(!willShow);
+     });
+
+         document.getElementById('hideWorkouts').addEventListener('click',()=>{
+       setMenuVisible(false);
+       showBtn.textContent = 'Show Workouts';
+       // Show the toggle button when workouts are hidden
+       setShowBtnVisible(true);
+     });
+
+         document.getElementById('openTreadmill').addEventListener('click',()=>{
+       setMenuVisible(false);
+       document.getElementById('treadmillSection').classList.remove('hidden');
+       setShowBtnVisible(false);
+       loadTreadmillInputs();
+       loadTreadmillChart();
+     });
+         document.getElementById('openStairs').addEventListener('click',()=>{
+       setMenuVisible(false);
+       document.getElementById('stairSection').classList.remove('hidden');
+       setShowBtnVisible(false);
+       loadStairsChart();
+     });
+         document.getElementById('backFromTreadmill').addEventListener('click',()=>{
+       document.getElementById('treadmillSection').classList.add('hidden');
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+       showBtn.textContent='Hide Workouts';
+     });
+     document.getElementById('backFromStairs').addEventListener('click',()=>{
+       document.getElementById('stairSection').classList.add('hidden');
+       setMenuVisible(true);
+       setShowBtnVisible(false);
+       showBtn.textContent='Hide Workouts';
+     });
+
+         // ===== Show More Toggle =====
+     document.getElementById('toggleFat').addEventListener('click',()=>{
+       const isDetailed = totalChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to deficit view
+         totalChart.data.datasets = [{
+           label: 'Calorie Deficit',
+           data: [],
+           borderColor: '#6ee7b7',
+           backgroundColor: 'rgba(110,231,183,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('toggleFat').textContent = 'Show More';
+       } else {
+         // Switch to detailed view
+         totalChart.data.datasets = [
+           {
+             label: 'Calories Burned',
+             data: [],
+             borderColor: '#6ee7b7',
+             backgroundColor: 'rgba(110,231,183,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Calories Eaten',
+             data: [],
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           }
+         ];
+         document.getElementById('toggleFat').textContent = 'Show Deficit';
+       }
+       updateCharts();
+     });
+
+     // Mobile show more toggles
+     document.getElementById('mobileToggleFat').addEventListener('click',()=>{
+       const isDetailed = mobileTotalChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to deficit view
+         mobileTotalChart.data.datasets = [{
+           label: 'Calorie Deficit',
+           data: [],
+           borderColor: '#6ee7b7',
+           backgroundColor: 'rgba(110,231,183,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('mobileToggleFat').textContent = 'Show More';
+       } else {
+         // Switch to detailed view
+         mobileTotalChart.data.datasets = [
+           {
+             label: 'Calories Burned',
+             data: [],
+             borderColor: '#6ee7b7',
+             backgroundColor: 'rgba(110,231,183,.3)',
+             fill: true,
+             tension: 0.25
+           },
+           {
+             label: 'Calories Eaten',
+             data: [],
+             borderColor: '#f59e0b',
+             backgroundColor: 'rgba(245,158,11,.3)',
+             fill: true,
+             tension: 0.25
+           }
+         ];
+         document.getElementById('mobileToggleFat').textContent = 'Show Deficit';
+       }
+       updateCharts();
+     });
+
+     document.getElementById('mobileToggleWeightFat').addEventListener('click',()=>{
+       const isFat=mobileWeightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileWeightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('mobileToggleWorkoutFat').addEventListener('click',()=>{
+       const isFat=mobileWorkoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       mobileWorkoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
+       const isDetailed = mobileFoodChart.data.datasets.length > 1;
+       if (isDetailed) {
+         // Switch back to total view
+         mobileFoodChart.data.datasets = [{
+           label: 'Food Calories',
+           data: [],
+           borderColor: '#f59e0b',
+           backgroundColor: 'rgba(245,158,11,.3)',
+           fill: true,
+           tension: 0.25
+         }];
+         document.getElementById('mobileToggleFoodDetail').textContent = 'Show More';
+       } else {
+         // Switch to detailed view showing individual foods
+         const labels = getAllDates();
+         const foodNames = new Set();
+         
+         // Collect all unique food names
+         labels.forEach(date => {
+           const day = foodDataByDate[date] || {};
+           Object.values(day).forEach(food => {
+             if (food.name) foodNames.add(food.name);
+           });
+         });
+         
+         const datasets = [];
+         const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#8b5cf6', '#f97316', '#06b6d4', '#84cc16'];
+         
+         Array.from(foodNames).forEach((foodName, index) => {
+           const foodData = labels.map(date => {
+             const day = foodDataByDate[date] || {};
+             const food = Object.values(day).find(f => f.name === foodName);
+             return food ? food.totalCalories : 0;
+           });
+           
+           datasets.push({
+             label: foodName,
+             data: foodData,
+             borderColor: colors[index % colors.length],
+             backgroundColor: colors[index % colors.length] + '40',
+             fill: false,
+             tension: 0.25,
+             pointRadius: 6,
+             pointHoverRadius: 9
+           });
+         });
+         
+         mobileFoodChart.data.datasets = datasets;
+         document.getElementById('mobileToggleFoodDetail').textContent = 'Show Total';
+       }
+       updateCharts();
+     });
+
+     document.getElementById('toggleWorkoutFat').addEventListener('click',()=>{
+       const isFat=workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       workoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('toggleWeightFat').addEventListener('click',()=>{
+       const isFat=weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       weightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+       updateCharts();
+     });
+
+     document.getElementById('toggleTreadmillFat').addEventListener('click',()=>{
+       const isFat=tchart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       tchart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       tchart.update();
+     });
+
+     document.getElementById('toggleStairsFat').addEventListener('click',()=>{
+       const isFat=schart.options.scales.y.title?.text==='Fat Loss (lbs)';
+       schart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+       schart.update();
+     });
+
+         // ===== Manual Add Calories =====
+     document.getElementById('addCaloriesBtn').addEventListener('click', showAddCaloriesModal);
+     
+     // Mobile button event listeners
+     document.getElementById('mobileAddCaloriesBtn').addEventListener('click', showAddCaloriesModal);
+     document.getElementById('mobileAddWeightBtn').addEventListener('click', showAddWeightModal);
+     document.getElementById('mobileShowWorkouts').addEventListener('click', () => {
+       // Show mobile workout menu modal
+       showMobileWorkoutMenu();
+     });
+     document.getElementById('mobileShowFoods').addEventListener('click', () => {
+       // Show mobile food menu modal
+       showMobileFoodMenu();
+     });
+     document.getElementById('mobileOpenSettings').addEventListener('click', showSettings);
+     document.getElementById('mobileDeleteAccountBtn').addEventListener('click', async () => {
+       if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+         try {
+           await db.collection('users').doc(currentUser.uid).delete();
+           await currentUser.delete();
+           auth.signOut();
+         } catch (error) {
+           console.error('Error deleting account:', error);
+           alert('Error deleting account. Please try again.');
+         }
+       }
+     });
+     document.getElementById('mobileLogoutBtn').addEventListener('click', () => {
+       auth.signOut();
+     });
+     
+     // Mobile workout menu event listeners
+     document.getElementById('closeMobileWorkoutMenu').addEventListener('click', hideMobileWorkoutMenu);
+     document.getElementById('mobileOpenTreadmill').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileTreadmillModal();
+     });
+     document.getElementById('mobileOpenStairs').addEventListener('click', () => {
+       hideMobileWorkoutMenu();
+       showMobileStairsModal();
+     });
+     
+     // Mobile food menu event listeners
+     document.getElementById('closeMobileFoodMenu').addEventListener('click', hideMobileFoodMenu);
+     document.getElementById('mobileAddCustomFood').addEventListener('click', () => {
+       hideMobileFoodMenu();
+       showMobileCustomFoodModal();
+     });
+     
+     // Mobile treadmill event listeners
+     document.getElementById('closeMobileTreadmill').addEventListener('click', hideMobileTreadmillModal);
+     document.getElementById('mobileTcalc').addEventListener('click', () => {
+       const w = userProfile?.weight || 170;
+       const s = +document.getElementById('mobileTspeed').value;
+       const g = +document.getElementById('mobileTgrade').value;
+       const m = +document.getElementById('mobileTdur').value;
+       
+       if (!w || !s || !g || !m) {
+         document.getElementById('mobileTresult').innerHTML = '<p>Please enter all values</p>';
+         return;
+       }
+       
+       const total = calcTreadmillKcal(w, s, g, m);
+       document.getElementById('mobileTresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       
+       // If there's already treadmill data for today, add to it instead of replacing
+       if (workoutDataByDate[today].treadmill) {
+         workoutDataByDate[today].treadmill.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].treadmill.workouts) {
+           workoutDataByDate[today].treadmill.workouts = [];
+         }
+         workoutDataByDate[today].treadmill.workouts.push({
+           w: w, s: s, g: g, m: m,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].treadmill = {
+           w: w, s: s, g: g, m: m,
+           calories: Math.round(total),
+           workouts: [{
+             w: w, s: s, g: g, m: m,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       saveUserData();
+       
+       // Update charts
+       updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileTreadmillModal();
+       }, 2000);
+     });
+     
+     // Mobile stairs event listeners
+     document.getElementById('closeMobileStairs').addEventListener('click', hideMobileStairsModal);
+     document.getElementById('mobileScalc').addEventListener('click', () => {
+       const w = userProfile?.weight || 170;
+       const m = +document.getElementById('mobileSdur').value;
+       let met = document.getElementById('mobileSintensity').value === 'custom' ? 
+         +document.getElementById('mobileScustom').value : 
+         +document.getElementById('mobileSintensity').value;
+       
+       if (!w || !m || !met) {
+         document.getElementById('mobileSresult').innerHTML = '<p>Please enter all values</p>';
+         return;
+       }
+       
+       const total = calcStairKcal(w, m, met);
+       document.getElementById('mobileSresult').innerHTML = `<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
+       addActivityForToday(total);
+       
+       // Save workout data to Firebase for graphs
+       const today = todayStr();
+       if (!workoutDataByDate[today]) {
+         workoutDataByDate[today] = {};
+       }
+       
+       // If there's already stairs data for today, add to it instead of replacing
+       if (workoutDataByDate[today].stairs) {
+         workoutDataByDate[today].stairs.calories += Math.round(total);
+         // Update the individual workout data as well
+         if (!workoutDataByDate[today].stairs.workouts) {
+           workoutDataByDate[today].stairs.workouts = [];
+         }
+         workoutDataByDate[today].stairs.workouts.push({
+           w: w, m: m, met: met,
+           calories: Math.round(total)
+         });
+       } else {
+         workoutDataByDate[today].stairs = {
+           w: w, m: m, met: met,
+           calories: Math.round(total),
+           workouts: [{
+             w: w, m: m, met: met,
+             calories: Math.round(total)
+           }]
+         };
+       }
+       saveUserData();
+       
+       // Update charts
+       updateCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileStairsModal();
+       }, 2000);
+     });
+     
+     // Mobile treadmill input event listeners
+     ['input', 'change'].forEach(evt => {
+       document.getElementById('mobileTspeed').addEventListener(evt, previewMobileTreadmill);
+       document.getElementById('mobileTgrade').addEventListener(evt, previewMobileTreadmill);
+       document.getElementById('mobileTdur').addEventListener(evt, previewMobileTreadmill);
+     });
+     
+     // Mobile stairs intensity change listener
+     document.getElementById('mobileSintensity').addEventListener('change', () => {
+       const isCustom = document.getElementById('mobileSintensity').value === 'custom';
+       document.getElementById('mobileCustomMetField').classList.toggle('hidden', !isCustom);
+     });
+     
+
+     
+     // Mobile custom food event listeners
+     document.getElementById('mobileCustomFoodCalc').addEventListener('click', () => {
+       const name = document.getElementById('mobileCustomFoodName').value;
+       const calories = +document.getElementById('mobileCustomFoodCalories').value;
+       
+       if (!name || !calories) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter both name and calories</p>';
+         return;
+       }
+       
+       if (calories <= 0) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter a valid calorie amount</p>';
+         return;
+       }
+       
+       const isUpdate = document.getElementById('mobileCustomFoodCalc').textContent === 'Add Food Calories';
+       
+       // Save custom food to Firebase
+       const icon = pickEmoji(name);
+       customFoods[name] = {
+         name: name,
+         calories: calories,
+         icon: icon
+       };
+       
+       // Also save to food data for today's tracking
+       const today = todayStr();
+       if (!foodDataByDate[today]) {
+         foodDataByDate[today] = {};
+       }
+       
+       // For updates, we need to find and update the existing entry
+       if (isUpdate) {
+         const originalName = document.getElementById('mobileCustomFoodModal').dataset.originalName;
+         
+         // Find the existing food entry and add to it
+         Object.keys(foodDataByDate[today]).forEach(key => {
+           if (foodDataByDate[today][key].name === originalName) {
+             // Add to the existing calories instead of replacing
+             const existingCalories = foodDataByDate[today][key].totalCalories || 0;
+             const newTotalCalories = existingCalories + calories;
+             
+             foodDataByDate[today][key] = {
+               name: name,
+               calories: calories,
+               quantity: 1,
+               totalCalories: newTotalCalories
+             };
+           }
+         });
+       } else {
+         // For new foods, add to today's data
+         foodDataByDate[today][name.toLowerCase().replace(/\s+/g, '_')] = {
+           name: name,
+           calories: calories,
+           quantity: 1,
+           totalCalories: calories
+         };
+       }
+       
+       saveUserData();
+       
+       // Update food menu to show new custom food
+       updateFoodMenu();
+       
+       // Update charts to show the new food calories
+       updateCharts();
+       
+       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>${isUpdate ? 'Logged' : 'Added'}: ${name} (${calories} kcal)</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileCustomFoodModal();
+       }, 2000);
+     });
+     
+     // Mobile custom food input event listeners
+     document.getElementById('mobileCustomFoodName').addEventListener('input', updateCustomFoodIcon);
+     
+     // Mobile delete custom food event listener
+     document.getElementById('mobileDeleteCustomFood').addEventListener('click', () => {
+       const name = document.getElementById('mobileCustomFoodName').value;
+       
+       if (!name) {
+         document.getElementById('mobileCustomFoodResult').innerHTML = '<p>Please enter a food name to delete</p>';
+         return;
+       }
+       
+       // Remove from custom foods
+       delete customFoods[name];
+       
+       // Remove from today's food data
+       const today = todayStr();
+       if (foodDataByDate[today]) {
+         Object.keys(foodDataByDate[today]).forEach(key => {
+           if (foodDataByDate[today][key].name === name) {
+             delete foodDataByDate[today][key];
+           }
+         });
+       }
+       
+       saveUserData();
+       updateFoodMenu();
+       updateCharts();
+       
+       document.getElementById('mobileCustomFoodResult').innerHTML = `<div class='math'>Deleted: ${name}</div>`;
+       
+       // Close modal after a short delay
+       setTimeout(() => {
+         hideMobileCustomFoodModal();
+       }, 2000);
+     });
+     
+     // Mobile food modal close event listeners
+     document.getElementById('closeMobileCustomFood').addEventListener('click', hideMobileCustomFoodModal);
+     
+     // Add Calories Modal Event Listeners
+     document.getElementById('cancelAddCalories').addEventListener('click', hideAddCaloriesModal);
+     document.getElementById('submitAddCalories').addEventListener('click', () => {
+       const calories = Number(document.getElementById('caloriesAmount').value);
+       const date = document.getElementById('caloriesDate').value;
+       const errorDiv = document.getElementById('addCaloriesError');
+       const successDiv = document.getElementById('addCaloriesSuccess');
+       
+       if (!calories || !date) {
+         errorDiv.textContent = 'Please fill in all fields';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       if (isNaN(calories)) {
+         errorDiv.textContent = 'Please enter a valid number';
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+         return;
+       }
+       
+       try {
+         // Add calories for the specific date
+         const d = date;
+         if (!activityByDate[d]) activityByDate[d] = 0;
+         activityByDate[d] += Math.round(calories);
+         updateCharts();
+         saveUserData();
+         
+         errorDiv.classList.add('hidden');
+         successDiv.textContent = 'Calories updated successfully!';
+         successDiv.classList.remove('hidden');
+         
+         setTimeout(() => {
+           hideAddCaloriesModal();
+         }, 1500);
+       } catch (error) {
+         errorDiv.textContent = error.message;
+         errorDiv.classList.remove('hidden');
+         successDiv.classList.add('hidden');
+       }
+     });
+
+         // Initialize app
+     window.addEventListener('DOMContentLoaded',()=>{
+       console.log('DOM loaded, initializing app...');
+       
+       liftModalsToBody(); // <-- make modals visible on mobile
+       
+       // Prefill example values for profile setup
+       document.getElementById('setupAge').value=22;
+       document.getElementById('setupHeightFt').value=5;
+       document.getElementById('setupHeightIn').value=9;
+       document.getElementById('setupWeight').value=170;
+       
+       // Prefill treadmill preview with defaults
+       tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
+       
+                // Initialize mobile swipe functionality
+       initMobileSwipe();
+       
+       // Initialize mobile slides
+       showSlide(0);
+       
+       // Fix centering issues for all mobile slides
+       fixMobileSlideCentering();
+       
+       // Force centering reset for users with cached issues
+       setTimeout(() => {
+         forceMobileSlideCentering();
+         fixStreakModulePositioning();
+       }, 100);
+       
+       // Reset mobile container to fix any existing "pushed up" state
+       resetMobileContainer();
+       
+       // Initialize food menu
+       updateFoodMenu();
+       
+       // Ensure auth modal shows for new users
+       if (!currentUser) {
+         setTimeout(() => {
+           showAuthModal();
+         }, 300);
+       }
+       
+                // Force show auth modal initially, then let Firebase auth state take over
+       setTimeout(() => {
+         console.log('Initial timeout - authStateInitialized:', authStateInitialized);
+         if (!authStateInitialized) {
+           console.log('Showing auth modal initially');
+           showAuthModal();
+         }
+       }, 200);
+     });
+  </script>
 </body>
 </html>
