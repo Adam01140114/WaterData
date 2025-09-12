@@ -101,3 +101,20 @@ Key technical changes:
   - Fixed null reference error in `updateMeterReadsLocationDropdowns()`
   - Added console logging for debugging
 - **Result**: Meter reads history modal now works perfectly on mobile devices
+
+**EMAILJS HTML TABLE RENDERING ISSUE (2025-01-11)**
+- **Problem**: EmailJS was displaying HTML table code as raw text instead of rendering it as a proper table
+- **Root Cause**: EmailJS template was treating `{{table_data}}` variable as plain text instead of HTML
+- **Solution**: Used triple braces `{{{table_data}}}` in EmailJS template and created hybrid approach
+- **Changes Made**:
+  - Updated EmailJS template to use `{{{table_data}}}` instead of `{{table_data}}` for HTML rendering
+  - Added `text_table` variable as backup for text-based table display
+  - Created simplified HTML table structure without `<thead>` and `<tbody>` tags for better email compatibility
+  - Added hybrid template that shows both HTML table and text table
+  - Improved timestamp formatting for better readability
+- **Technical Details**:
+  - Double braces `{{}}` escape HTML characters (e.g., `<table>` becomes `&lt;table&gt;`)
+  - Triple braces `{{{}}}` treat content as raw HTML without escaping
+  - Email clients have different HTML rendering capabilities
+  - Hybrid approach ensures data is always readable regardless of HTML support
+- **Result**: Emails now display properly formatted tables with professional appearance

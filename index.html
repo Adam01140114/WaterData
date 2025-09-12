@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
      <title>WorkSmart - Calorie Tracker</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
@@ -832,7 +833,7 @@
 
              <!-- Mobile Navigation -->
       <div class="mobile-navigation">
-        <div class="swipe-hint">
+        <div class="swipe-hint" style="display: none;">
           <span>← Swipe to navigate →</span>
         </div>
         <div class="mobile-indicators">
@@ -1508,6 +1509,11 @@
    </div>
 
   <script>
+    // ===== EmailJS Configuration =====
+    (function() {
+      emailjs.init("WhhwBTfgathw3wOR7");
+    })();
+
     // ===== State Variables =====
     let bmr=0;
     let basalByDate={};     // date -> BMR for that date
@@ -3163,6 +3169,9 @@
            return;
          }
          renderMeterReads(location, customLocation, value, date);
+         // Close both the entry modal and the menu after logging
+         hideMeterReadsModal();
+         hideMeterReadsMenu();
        });
        
        // Input change listeners
@@ -3359,8 +3368,8 @@
          meterReadsDataByDate[date] = {};
        }
        
-       // Store meter reads data by location
-       meterReadsDataByDate[date][location] = {
+       // Store meter reads data by location (use locationName as key to avoid duplicates)
+       meterReadsDataByDate[date][locationName] = {
          value: value,
          locationName: locationName,
          timestamp: new Date().toISOString()
@@ -3391,7 +3400,7 @@
        
        const filteredDates = dates.filter(date => date >= twoMonthsAgoStr);
        const filteredLabels = filteredDates.map(date => {
-         const d = new Date(date);
+         const d = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
        });
        
@@ -3399,18 +3408,18 @@
        const locationData = {};
        filteredDates.forEach(date => {
          const dayData = meterReadsDataByDate[date];
-         Object.keys(dayData).forEach(location => {
-           if (dayData[location] && dayData[location].value) {
-             if (!locationData[location]) {
-               locationData[location] = {
-                 label: dayData[location].locationName,
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
+             if (!locationData[locationName]) {
+               locationData[locationName] = {
+                 label: dayData[locationName].locationName,
                  data: [],
                  borderColor: getLocationColor(Object.keys(locationData).length),
                  backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
                  tension: 0.1
                };
              }
-             locationData[location].data.push(dayData[location].value);
+             locationData[locationName].data.push(dayData[locationName].value);
            }
          });
        });
@@ -3435,7 +3444,7 @@
      function updateMeterReadsChartsFullYear() {
        const dates = Object.keys(meterReadsDataByDate).sort();
        const filteredLabels = dates.map(date => {
-         const d = new Date(date);
+         const d = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
        });
        
@@ -3443,18 +3452,18 @@
        const locationData = {};
        dates.forEach(date => {
          const dayData = meterReadsDataByDate[date];
-         Object.keys(dayData).forEach(location => {
-           if (dayData[location] && dayData[location].value) {
-             if (!locationData[location]) {
-               locationData[location] = {
-                 label: dayData[location].locationName,
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
+             if (!locationData[locationName]) {
+               locationData[locationName] = {
+                 label: dayData[locationName].locationName,
                  data: [],
                  borderColor: getLocationColor(Object.keys(locationData).length),
                  backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
                  tension: 0.1
                };
              }
-             locationData[location].data.push(dayData[location].value);
+             locationData[locationName].data.push(dayData[locationName].value);
            }
          });
        });
@@ -3496,14 +3505,14 @@
        let filteredData = [];
        dates.forEach(date => {
          const dayData = meterReadsDataByDate[date];
-         Object.keys(dayData).forEach(location => {
-           if (dayData[location] && dayData[location].value) {
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
              // Check location filter
-             if (!locationFilter || location === locationFilter) {
+             if (!locationFilter || locationName === locationFilter) {
                filteredData.push({
                  date,
-                 location,
-                 data: dayData[location]
+                 location: locationName,
+                 data: dayData[locationName]
                });
              }
            }
@@ -3555,16 +3564,30 @@
                <div style="font-weight: 600; color: #f3f4f6; font-size: 16px;">${entry.data.locationName}</div>
                <div style="color: #9ca3af; font-size: 14px;">${formattedDate}</div>
              </div>
-             <div style="
-               background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-               color: white;
-               padding: 8px 16px;
-               border-radius: 20px;
-               font-weight: 600;
-               font-size: 14px;
-               min-width: 80px;
-               text-align: center;
-             ">${entry.data.value} ft</div>
+             <div style="display: flex; align-items: center; gap: 12px;">
+               <div style="
+                 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                 color: white;
+                 padding: 8px 16px;
+                 border-radius: 20px;
+                 font-weight: 600;
+                 font-size: 14px;
+                 min-width: 80px;
+                 text-align: center;
+               ">${entry.data.value} ft</div>
+               <button onclick="deleteMeterReadsEntry('${entry.date}', '${entry.data.locationName}')" style="
+                 background: #dc2626;
+                 color: white;
+                 border: none;
+                 border-radius: 6px;
+                 padding: 8px 12px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                 🗑️ Delete
+               </button>
+             </div>
            </div>
          `;
        });
@@ -3577,7 +3600,139 @@
        resultDiv.innerHTML = historyHTML;
      }
 
-     function exportMeterReadsDataToExcel() {
+     function deleteMeterReadsEntry(date, locationName) {
+       if (confirm('Are you sure you want to delete this meter reading entry?')) {
+         // Remove the entry from the data
+         if (meterReadsDataByDate[date] && meterReadsDataByDate[date][locationName]) {
+           delete meterReadsDataByDate[date][locationName];
+           
+           // If no more entries for this date, remove the date entirely
+           if (Object.keys(meterReadsDataByDate[date]).length === 0) {
+             delete meterReadsDataByDate[date];
+           }
+           
+           // Save to Firebase
+           saveUserData();
+           
+           // Reload the history to reflect changes
+           loadMeterReadsHistory();
+           
+           // Update charts
+           updateMeterReadsCharts();
+         }
+       }
+     }
+
+     function showEmailModal() {
+       console.log('showEmailModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('emailModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'emailModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <div style="display: flex; align-items: center; margin-bottom: 20px;">
+           <div style="font-size: 24px; margin-right: 12px;">📧</div>
+           <div>
+             <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Send Data via Email</h3>
+             <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Enter email address to receive your meter reads data</p>
+           </div>
+         </div>
+         
+         <div style="margin-bottom: 20px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Email Address</label>
+           <input id="emailAddress" type="email" placeholder="Enter email address" style="
+             width: 100%;
+             padding: 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+             box-sizing: border-box;
+           " />
+         </div>
+         
+         <div id="emailResult" style="margin-bottom: 16px;"></div>
+         
+         <div style="display: flex; flex-direction: column; gap: 12px;">
+           <button id="sendEmailBtn" class="primary" style="width: 100%;">📧 Send Data</button>
+           <button id="closeEmailModal" class="ghost" style="width: 100%;">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Add event listeners
+       document.getElementById('closeEmailModal').addEventListener('click', hideEmailModal);
+       document.getElementById('sendEmailBtn').addEventListener('click', sendMeterReadsDataViaEmail);
+       
+       console.log('New email modal created and should be visible');
+     }
+
+     function hideEmailModal() {
+       const emailModal = document.getElementById('emailModal');
+       if (emailModal) {
+         emailModal.remove();
+       }
+     }
+
+     function sendMeterReadsDataViaEmail() {
+       const emailAddress = document.getElementById('emailAddress').value.trim();
+       const resultDiv = document.getElementById('emailResult');
+       
+       if (!emailAddress) {
+         resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter an email address</p>';
+         return;
+       }
+       
+       if (!emailAddress.includes('@')) {
+         resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter a valid email address</p>';
+         return;
+       }
+       
+       // Show loading state
+       resultDiv.innerHTML = '<p style="color: #3b82f6; margin: 0;">Sending email...</p>';
+       document.getElementById('sendEmailBtn').disabled = true;
+       document.getElementById('sendEmailBtn').textContent = 'Sending...';
+       
+       // Prepare data
        const dates = Object.keys(meterReadsDataByDate).sort();
        const allData = [];
        
@@ -3587,13 +3742,136 @@
        // Add data rows
        dates.forEach(date => {
          const dayData = meterReadsDataByDate[date];
-         Object.keys(dayData).forEach(location => {
-           if (dayData[location] && dayData[location].value) {
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
              allData.push([
                date,
-               dayData[location].locationName,
-               dayData[location].value,
-               dayData[location].timestamp || ''
+               dayData[locationName].locationName,
+               dayData[locationName].value,
+               dayData[locationName].timestamp || ''
+             ]);
+           }
+         });
+       });
+       
+       // Convert to CSV format
+       const csvContent = allData.map(row => 
+         row.map(cell => `"${cell}"`).join(',')
+       ).join('\n');
+       
+       // Create HTML table for email body - using more email-friendly HTML
+       let tableHTML = `
+         <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">
+           <tr style="background-color: #f2f2f2;">
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Location</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Meter Read (ft)</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Timestamp</th>
+           </tr>
+       `;
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
+             const timestamp = dayData[locationName].timestamp ? 
+               new Date(dayData[locationName].timestamp).toLocaleString() : '';
+             tableHTML += `
+               <tr>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${date}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${dayData[locationName].locationName}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${dayData[locationName].value}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${timestamp}</td>
+               </tr>
+             `;
+           }
+         });
+       });
+       
+       tableHTML += `
+         </table>
+       `;
+       
+       // Create a simple text table as backup
+       let textTable = `
+Date         | Location | Meter Read (ft) | Timestamp
+-------------|----------|-----------------|------------------
+       `;
+       
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
+             const timestamp = dayData[locationName].timestamp ? 
+               new Date(dayData[locationName].timestamp).toLocaleString() : '';
+             textTable += `${date.padEnd(12)} | ${locationName.padEnd(8)} | ${dayData[locationName].value.toString().padEnd(15)} | ${timestamp}\n`;
+           }
+         });
+       });
+       
+       // Send email using EmailJS
+       const templateParams = {
+         user_email: emailAddress,
+         to_email: emailAddress,
+         email: emailAddress,
+         from_name: 'WaterData App',
+         subject: `Meter Reads Data - ${todayStr()}`,
+         message: `Please find your meter reads data below, exported on ${new Date().toLocaleDateString()}.`,
+         table_data: tableHTML,
+         text_table: textTable,
+         csv_content: csvContent,
+         export_date: new Date().toLocaleDateString()
+       };
+       
+       console.log('Sending email with params:', templateParams);
+       console.log('Email address being sent:', emailAddress);
+       console.log('Table HTML being sent:', tableHTML);
+       
+       emailjs.send('service_tr7srcd', 'template_6er1sgu', templateParams)
+         .then(function(response) {
+           console.log('Email sent successfully:', response);
+           resultDiv.innerHTML = '<p style="color: #10b981; margin: 0;">✅ Email sent successfully!</p>';
+           document.getElementById('sendEmailBtn').textContent = 'Email Sent!';
+           
+           // Close modal after 2 seconds
+           setTimeout(() => {
+             hideEmailModal();
+           }, 2000);
+         })
+         .catch(function(error) {
+           console.error('Email sending failed:', error);
+           resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">❌ Failed to send email. Please try again.</p>';
+           document.getElementById('sendEmailBtn').disabled = false;
+           document.getElementById('sendEmailBtn').textContent = '📧 Send Data';
+         });
+     }
+
+     function exportMeterReadsDataToExcel() {
+       // Download the file immediately
+       downloadMeterReadsCSV();
+       
+       // Also show email modal
+       showEmailModal();
+     }
+
+     function downloadMeterReadsCSV() {
+       const dates = Object.keys(meterReadsDataByDate).sort();
+       const allData = [];
+       
+       // Add header row
+       allData.push(['Date', 'Location', 'Meter Read (ft)', 'Timestamp']);
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(locationName => {
+           if (dayData[locationName] && dayData[locationName].value) {
+             allData.push([
+               date,
+               dayData[locationName].locationName,
+               dayData[locationName].value,
+               dayData[locationName].timestamp || ''
              ]);
            }
          });
