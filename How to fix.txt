@@ -118,3 +118,20 @@ Key technical changes:
   - Email clients have different HTML rendering capabilities
   - Hybrid approach ensures data is always readable regardless of HTML support
 - **Result**: Emails now display properly formatted tables with professional appearance
+
+**SECTION DIVIDER VISIBILITY ISSUE (2025-01-11)**
+- **Problem**: No grey divider visible between "Meter Reads (ft)" and "Residual Readings (ft)" sections - they appeared squished together
+- **Root Cause**: Missing horizontal divider element between the two main sections
+- **Solution**: Added `<hr>` element with same styling as existing section dividers
+- **Changes Made**:
+  - Added horizontal divider between desktop Meter Reads and Residual Readings sections
+  - Added horizontal divider between mobile Meter Reads and Residual Readings sections
+  - Used identical styling as existing Water Level section divider: `rgba(255,255,255,0.1)` background
+  - Applied proper spacing: `margin: 20px 0` for vertical separation
+  - Used `<hr>` element instead of custom `<div>` for consistency
+- **Technical Details**:
+  - Desktop: Added `<hr>` between `</section>` and `<section class="card">`
+  - Mobile: Added `<hr>` with `<br>` spacing around it for proper mobile layout
+  - Styling: `border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;`
+  - Consistency: Matches existing divider between Water Level and Meter Reads sections
+- **Result**: Clear visual separation between Meter Reads and Residual Readings sections on both desktop and mobile

@@ -793,6 +793,10 @@
            <button class="ghost" id="mobileToggleMeterReadsLocation">Show More</button>
            <button class="primary" id="mobileShowMeterReads">Add Meter Read</button>
            
+           <br><br>
+           <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
+           <br>
+           
            <h2>Residual Readings (ft)</h2>
            <canvas id="mobileResidualReadingsChart" height="200"></canvas>
            <button class="ghost" id="mobileToggleResidualReadingsLocation">Show More</button>
@@ -1403,6 +1407,8 @@
          <button class="ghost" id="toggleMeterReadsLocation">Show More</button>
          <button class="primary" id="showMeterReads">Add Meter Read</button>
        </section>
+
+       <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
 
        <section class="card">
          <h2>Residual Readings (ft)</h2>
@@ -2071,6 +2077,10 @@
          
          // Load meter reads chart
          loadMeterReadsChart();
+         
+         // Load residual readings chart
+         loadResidualReadingsChart();
+         
          loadWaterLevelHistoryChart();
 
          // Update food menu with custom foods
@@ -2613,16 +2623,30 @@
                <div style="font-weight: 600; color: #f3f4f6; font-size: 16px;">${entry.data.locationName}</div>
                <div style="color: #9ca3af; font-size: 14px;">${formattedDate}</div>
              </div>
-             <div style="
-               background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-               color: white;
-               padding: 8px 16px;
-               border-radius: 20px;
-               font-weight: 600;
-               font-size: 14px;
-               min-width: 80px;
-               text-align: center;
-             ">${entry.data.level} ft</div>
+             <div style="display: flex; align-items: center; gap: 12px;">
+               <div style="
+                 background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+                 color: white;
+                 padding: 8px 16px;
+                 border-radius: 20px;
+                 font-weight: 600;
+                 font-size: 14px;
+                 min-width: 80px;
+                 text-align: center;
+               ">${entry.data.level} ft</div>
+               <button onclick="deleteWaterLevelEntry('${entry.date}', '${entry.data.locationName}')" style="
+                 background: #dc2626;
+                 color: white;
+                 border: none;
+                 border-radius: 6px;
+                 padding: 8px 12px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                 🗑️ Delete
+               </button>
+             </div>
            </div>
          `;
        });
@@ -2635,8 +2659,58 @@
        resultDiv.innerHTML = historyHTML;
      }
 
+     function deleteWaterLevelEntry(date, locationName) {
+       console.log('Delete button clicked for:', date, locationName);
+       if (confirm('Are you sure you want to delete this water level entry?')) {
+         console.log('User confirmed deletion');
+         
+         // Find the entry by locationName (since that's what we're searching for)
+         let foundEntry = null;
+         let foundKey = null;
+         
+         if (waterLevelDataByDate[date]) {
+           Object.keys(waterLevelDataByDate[date]).forEach(key => {
+             if (waterLevelDataByDate[date][key] && waterLevelDataByDate[date][key].locationName === locationName) {
+               foundEntry = waterLevelDataByDate[date][key];
+               foundKey = key;
+             }
+           });
+         }
+         
+         if (foundEntry && foundKey) {
+           console.log('Found entry to delete:', foundEntry);
+           delete waterLevelDataByDate[date][foundKey];
+           
+           // If no more entries for this date, remove the date entirely
+           if (Object.keys(waterLevelDataByDate[date]).length === 0) {
+             delete waterLevelDataByDate[date];
+           }
+           
+           // Save to Firebase
+           saveUserData();
+           
+           // Reload the history to reflect changes
+           loadMobileWaterLevelHistory();
+           
+           // Update charts
+           updateCharts();
+           console.log('Entry deleted successfully');
+         } else {
+           console.log('Entry not found in data');
+         }
+       }
+     }
+
      // ===== Excel Export Function =====
      function exportWaterLevelDataToExcel() {
+       // Download the file immediately
+       downloadWaterLevelCSV();
+       
+       // Also show email modal
+       showWaterLevelEmailModal();
+     }
+
+     function downloadWaterLevelCSV() {
        const dates = Object.keys(waterLevelDataByDate).sort();
        const allData = [];
        
@@ -2673,6 +2747,237 @@
        document.body.appendChild(link);
        link.click();
        document.body.removeChild(link);
+     }
+
+     function showWaterLevelEmailModal() {
+       console.log('showWaterLevelEmailModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('waterLevelEmailModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'waterLevelEmailModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <div style="display: flex; align-items: center; margin-bottom: 20px;">
+           <div style="font-size: 24px; margin-right: 12px;">📧</div>
+           <div>
+             <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Send Data via Email</h3>
+             <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Enter email address to receive your water level data</p>
+           </div>
+         </div>
+         
+         <div style="margin-bottom: 20px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Email Address</label>
+           <input id="waterLevelEmailAddress" type="email" placeholder="Enter email address" style="
+             width: 100%;
+             padding: 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+             box-sizing: border-box;
+           " />
+         </div>
+         
+         <div id="waterLevelEmailResult" style="margin-bottom: 16px;"></div>
+         
+         <div style="display: flex; flex-direction: column; gap: 12px;">
+           <button id="sendWaterLevelEmailBtn" class="primary" style="width: 100%;">📧 Send Data</button>
+           <button id="closeWaterLevelEmailModal" class="ghost" style="width: 100%;">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Add event listeners
+       document.getElementById('closeWaterLevelEmailModal').addEventListener('click', hideWaterLevelEmailModal);
+       document.getElementById('sendWaterLevelEmailBtn').addEventListener('click', sendWaterLevelDataViaEmail);
+       
+       console.log('New water level email modal created and should be visible');
+     }
+
+     function hideWaterLevelEmailModal() {
+       const waterLevelEmailModal = document.getElementById('waterLevelEmailModal');
+       if (waterLevelEmailModal) {
+         waterLevelEmailModal.remove();
+       }
+     }
+
+     function sendWaterLevelDataViaEmail() {
+       const emailAddress = document.getElementById('waterLevelEmailAddress').value.trim();
+       const resultDiv = document.getElementById('waterLevelEmailResult');
+       
+       if (!emailAddress) {
+         resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter an email address</p>';
+         return;
+       }
+       
+       if (!emailAddress.includes('@')) {
+         resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter a valid email address</p>';
+         return;
+       }
+       
+       // Show loading state
+       resultDiv.innerHTML = '<p style="color: #3b82f6; margin: 0;">Sending email...</p>';
+       document.getElementById('sendWaterLevelEmailBtn').disabled = true;
+       document.getElementById('sendWaterLevelEmailBtn').textContent = 'Sending...';
+       
+       // Prepare data
+       const dates = Object.keys(waterLevelDataByDate).sort();
+       const allData = [];
+       
+       // Add header row
+       allData.push(['Date', 'Location', 'Water Level (ft)', 'Timestamp']);
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].level) {
+             allData.push([
+               date,
+               dayData[location].locationName,
+               dayData[location].level,
+               dayData[location].timestamp || ''
+             ]);
+           }
+         });
+       });
+       
+       // Convert to CSV format
+       const csvContent = allData.map(row => 
+         row.map(cell => `"${cell}"`).join(',')
+       ).join('\n');
+       
+       // Create HTML table for email body - using more email-friendly HTML
+       let tableHTML = `
+         <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">
+           <tr style="background-color: #f2f2f2;">
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Location</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Water Level (ft)</th>
+             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Timestamp</th>
+           </tr>
+       `;
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].level) {
+             const timestamp = dayData[location].timestamp ? 
+               new Date(dayData[location].timestamp).toLocaleString() : '';
+             tableHTML += `
+               <tr>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${date}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${dayData[location].locationName}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${dayData[location].level}</td>
+                 <td style="border: 1px solid #ddd; padding: 8px;">${timestamp}</td>
+               </tr>
+             `;
+           }
+         });
+       });
+       
+       tableHTML += `
+         </table>
+       `;
+       
+       // Create a simple text table as backup
+       let textTable = `
+Water Level Data
+================
+
+Date         | Location | Water Level (ft) | Timestamp
+-------------|----------|------------------|------------------
+       `;
+       
+       dates.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].level) {
+             const timestamp = dayData[location].timestamp ? 
+               new Date(dayData[location].timestamp).toLocaleString() : '';
+             textTable += `${date.padEnd(12)} | ${dayData[location].locationName.padEnd(8)} | ${dayData[location].level.toString().padEnd(16)} | ${timestamp}\n`;
+           }
+         });
+       });
+       
+       textTable += `
+================
+       `;
+       
+       // Send email using EmailJS
+       const templateParams = {
+         user_email: emailAddress,
+         to_email: emailAddress,
+         email: emailAddress,
+         from_name: 'WaterData App',
+         subject: `Water Level Data - ${todayStr()}`,
+         message: `Please find your water level data below, exported on ${new Date().toLocaleDateString()}.`,
+         table_data: tableHTML,
+         text_table: textTable,
+         csv_content: csvContent,
+         export_date: new Date().toLocaleDateString()
+       };
+       
+       console.log('Sending water level email with params:', templateParams);
+       console.log('Email address being sent:', emailAddress);
+       console.log('Table HTML being sent:', tableHTML);
+       
+       emailjs.send('service_tr7srcd', 'template_6er1sgu', templateParams)
+         .then(function(response) {
+           console.log('Email sent successfully:', response);
+           resultDiv.innerHTML = '<p style="color: #10b981; margin: 0;">✅ Email sent successfully!</p>';
+           document.getElementById('sendWaterLevelEmailBtn').textContent = 'Email Sent!';
+           
+           // Close modal after 2 seconds
+           setTimeout(() => {
+             hideWaterLevelEmailModal();
+           }, 2000);
+         })
+         .catch(function(error) {
+           console.error('Email sending failed:', error);
+           resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">❌ Failed to send email. Please try again.</p>';
+           document.getElementById('sendWaterLevelEmailBtn').disabled = false;
+           document.getElementById('sendWaterLevelEmailBtn').textContent = '📧 Send Data';
+         });
      }
 
      // ===== Custom Locations Management =====
@@ -3412,6 +3717,39 @@
 
      function updateMeterReadsCharts() {
        const dates = Object.keys(meterReadsDataByDate).sort();
+       
+       // First check if there's any data at all
+       if (dates.length === 0) {
+         // Show "no data" message for desktop chart
+         if (typeof meterReadsChart !== 'undefined') {
+           meterReadsChart.data.labels = ['No data to display yet'];
+           meterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           meterReadsChart.update();
+         }
+         
+         // Show "no data" message for mobile chart
+         if (typeof mobileMeterReadsChart !== 'undefined') {
+           mobileMeterReadsChart.data.labels = ['No data to display yet'];
+           mobileMeterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           mobileMeterReadsChart.update();
+         }
+         return;
+       }
+       
        const twoMonthsAgo = new Date();
        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
        const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
@@ -3444,18 +3782,49 @@
        
        const datasets = Object.values(locationData);
        
-       // Update desktop chart
-       if (typeof meterReadsChart !== 'undefined') {
-         meterReadsChart.data.labels = filteredLabels;
-         meterReadsChart.data.datasets = datasets;
-         meterReadsChart.update();
-       }
-       
-       // Update mobile chart
-       if (typeof mobileMeterReadsChart !== 'undefined') {
-         mobileMeterReadsChart.data.labels = filteredLabels;
-         mobileMeterReadsChart.data.datasets = datasets;
-         mobileMeterReadsChart.update();
+       // Check if there's no data
+       if (datasets.length === 0) {
+         // Show "no data" message for desktop chart
+         if (typeof meterReadsChart !== 'undefined') {
+           meterReadsChart.data.labels = ['No data to display yet'];
+           meterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           meterReadsChart.update();
+         }
+         
+         // Show "no data" message for mobile chart
+         if (typeof mobileMeterReadsChart !== 'undefined') {
+           mobileMeterReadsChart.data.labels = ['No data to display yet'];
+           mobileMeterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           mobileMeterReadsChart.update();
+         }
+       } else {
+         // Update desktop chart with data
+         if (typeof meterReadsChart !== 'undefined') {
+           meterReadsChart.data.labels = filteredLabels;
+           meterReadsChart.data.datasets = datasets;
+           meterReadsChart.update();
+         }
+         
+         // Update mobile chart with data
+         if (typeof mobileMeterReadsChart !== 'undefined') {
+           mobileMeterReadsChart.data.labels = filteredLabels;
+           mobileMeterReadsChart.data.datasets = datasets;
+           mobileMeterReadsChart.update();
+         }
        }
      }
 
@@ -3488,18 +3857,49 @@
        
        const datasets = Object.values(locationData);
        
-       // Update desktop chart
-       if (typeof meterReadsChart !== 'undefined') {
-         meterReadsChart.data.labels = filteredLabels;
-         meterReadsChart.data.datasets = datasets;
-         meterReadsChart.update();
-       }
-       
-       // Update mobile chart
-       if (typeof mobileMeterReadsChart !== 'undefined') {
-         mobileMeterReadsChart.data.labels = filteredLabels;
-         mobileMeterReadsChart.data.datasets = datasets;
-         mobileMeterReadsChart.update();
+       // Check if there's no data
+       if (datasets.length === 0) {
+         // Show "no data" message for desktop chart
+         if (typeof meterReadsChart !== 'undefined') {
+           meterReadsChart.data.labels = ['No data to display yet'];
+           meterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           meterReadsChart.update();
+         }
+         
+         // Show "no data" message for mobile chart
+         if (typeof mobileMeterReadsChart !== 'undefined') {
+           mobileMeterReadsChart.data.labels = ['No data to display yet'];
+           mobileMeterReadsChart.data.datasets = [{
+             label: 'No Data',
+             data: [0],
+             borderColor: 'transparent',
+             backgroundColor: 'transparent',
+             pointRadius: 0,
+             pointHoverRadius: 0
+           }];
+           mobileMeterReadsChart.update();
+         }
+       } else {
+         // Update desktop chart with data
+         if (typeof meterReadsChart !== 'undefined') {
+           meterReadsChart.data.labels = filteredLabels;
+           meterReadsChart.data.datasets = datasets;
+           meterReadsChart.update();
+         }
+         
+         // Update mobile chart with data
+         if (typeof mobileMeterReadsChart !== 'undefined') {
+           mobileMeterReadsChart.data.labels = filteredLabels;
+           mobileMeterReadsChart.data.datasets = datasets;
+           mobileMeterReadsChart.update();
+         }
        }
      }
 
@@ -4321,6 +4721,1053 @@ Date         | Location | Meter Read (ft) | Timestamp
 
          // BMR calculation is now handled automatically from user profile
 
+         // ===== Residual Readings Functions =====
+         function showResidualReadingsMenu() {
+           console.log('showResidualReadingsMenu called');
+           
+           // Create a completely new, simple modal that we know will work
+           const existingModal = document.getElementById('residualReadingsMenuModal');
+           if (existingModal) {
+             existingModal.remove();
+           }
+           
+           // Create new modal
+           const newModal = document.createElement('div');
+           newModal.id = 'residualReadingsMenuModal';
+           newModal.style.cssText = `
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background-color: rgba(0, 0, 0, 0.8);
+             z-index: 99999;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             padding: 20px;
+             box-sizing: border-box;
+           `;
+           
+           // Create modal content
+           const modalContent = document.createElement('div');
+           modalContent.style.cssText = `
+             background-color: #1f2937;
+             border-radius: 12px;
+             padding: 20px;
+             max-width: 90%;
+             max-height: 90vh;
+             overflow-y: auto;
+             color: white;
+             width: 100%;
+             box-sizing: border-box;
+           `;
+           
+           // Add content
+           modalContent.innerHTML = `
+             <div style="display: flex; align-items: center; margin-bottom: 20px;">
+               <div style="font-size: 24px; margin-right: 12px;">📊</div>
+               <div>
+                 <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Residual Readings</h3>
+                 <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Track residual readings at different locations</p>
+               </div>
+             </div>
+             
+             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+               <div id="openResidualReadingsEntry" style="
+                 background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+                 border: 1px solid #4b5563;
+                 border-radius: 8px;
+                 padding: 16px;
+                 text-align: center;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                 <div style="font-size: 24px; margin-bottom: 8px;">📝</div>
+                 <div style="color: #f3f4f6; font-weight: 600; font-size: 14px;">Add Residual Reading</div>
+               </div>
+               
+               <div id="openResidualReadingsHistory" style="
+                 background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+                 border: 1px solid #4b5563;
+                 border-radius: 8px;
+                 padding: 16px;
+                 text-align: center;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                 <div style="font-size: 24px; margin-bottom: 8px;">📋</div>
+                 <div style="color: #f3f4f6; font-weight: 600; font-size: 14px;">View History</div>
+               </div>
+             </div>
+             
+             <div style="text-align: center;">
+               <button id="closeResidualReadingsMenu" class="ghost">Close</button>
+             </div>
+           `;
+           
+           newModal.appendChild(modalContent);
+           document.body.appendChild(newModal);
+           
+           // Add event listeners
+           document.getElementById('openResidualReadingsEntry').addEventListener('click', showResidualReadingsModal);
+           document.getElementById('openResidualReadingsHistory').addEventListener('click', showResidualReadingsHistoryModal);
+           document.getElementById('closeResidualReadingsMenu').addEventListener('click', hideResidualReadingsMenu);
+           
+           console.log('New residual readings menu modal created and should be visible');
+         }
+
+         function hideResidualReadingsMenu() {
+           const residualReadingsMenuModal = document.getElementById('residualReadingsMenuModal');
+           if (residualReadingsMenuModal) {
+             residualReadingsMenuModal.remove();
+           }
+         }
+
+         function showResidualReadingsModal() {
+           console.log('showResidualReadingsModal called');
+           hideResidualReadingsMenu();
+           
+           // Create a completely new, simple modal that we know will work
+           const existingModal = document.getElementById('residualReadingsModal');
+           if (existingModal) {
+             existingModal.remove();
+           }
+           
+           // Create new modal
+           const newModal = document.createElement('div');
+           newModal.id = 'residualReadingsModal';
+           newModal.style.cssText = `
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background-color: rgba(0, 0, 0, 0.8);
+             z-index: 99999;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             padding: 20px;
+             box-sizing: border-box;
+           `;
+           
+           // Create modal content
+           const modalContent = document.createElement('div');
+           modalContent.style.cssText = `
+             background-color: #1f2937;
+             border-radius: 12px;
+             padding: 20px;
+             max-width: 90%;
+             max-height: 90vh;
+             overflow-y: auto;
+             color: white;
+             width: 100%;
+             box-sizing: border-box;
+           `;
+           
+           // Add content
+           modalContent.innerHTML = `
+             <div style="display: flex; align-items: center; margin-bottom: 20px;">
+               <div style="font-size: 24px; margin-right: 12px;">📊</div>
+               <div>
+                 <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Add Residual Reading</h3>
+                 <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Log a new residual reading entry</p>
+               </div>
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Location</label>
+               <select id="residualReadingsLocation" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               ">
+                 <option value="">Select location...</option>
+                 <option value="custom">Custom Location</option>
+               </select>
+             </div>
+             
+             <div id="customResidualReadingsLocationField" style="margin-bottom: 20px; display: none;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Custom Location Name</label>
+               <input id="customResidualReadingsLocationName" type="text" placeholder="Enter custom location name" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               " />
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Residual Reading (ft)</label>
+               <input id="residualReadingsValue" type="number" step="0.01" placeholder="Enter residual reading" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               " />
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Date</label>
+               <input id="residualReadingsDate" type="date" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               " />
+             </div>
+             
+             <div id="residualReadingsResult" style="margin-bottom: 16px;"></div>
+             
+             <div style="display: flex; flex-direction: column; gap: 12px;">
+               <button id="residualReadingsCalc" class="primary" style="width: 100%;">Log Residual Reading</button>
+               <button id="closeResidualReadings" class="ghost" style="width: 100%;">Close</button>
+             </div>
+           `;
+           
+           newModal.appendChild(modalContent);
+           document.body.appendChild(newModal);
+           
+           // Set default date to today
+           document.getElementById('residualReadingsDate').value = todayStr();
+           
+           // Populate location dropdown with custom locations
+           const locationDropdown = document.getElementById('residualReadingsLocation');
+           customResidualReadingsLocations.forEach(location => {
+             const option = document.createElement('option');
+             option.value = location;
+             option.textContent = location;
+             option.setAttribute('data-custom', 'true');
+             locationDropdown.appendChild(option);
+           });
+           
+           // Add event listeners
+           document.getElementById('closeResidualReadings').addEventListener('click', hideResidualReadingsModal);
+           document.getElementById('residualReadingsCalc').addEventListener('click', function() {
+             const { location, customLocation, value, date } = residualReadingsInputs();
+             if (!location || !value || !date) {
+               document.getElementById('residualReadingsResult').innerHTML = '<p style="color: #ef4444;">Please enter all values</p>';
+               return;
+             }
+             if (location === 'custom' && !customLocation) {
+               document.getElementById('residualReadingsResult').innerHTML = '<p style="color: #ef4444;">Please enter custom location name</p>';
+               return;
+             }
+             renderResidualReadings(location, customLocation, value, date);
+             // Close both the entry modal and the menu after logging
+             hideResidualReadingsModal();
+             hideResidualReadingsMenu();
+           });
+           
+           // Location dropdown change listener
+           document.getElementById('residualReadingsLocation').addEventListener('change', function() {
+             const customField = document.getElementById('customResidualReadingsLocationField');
+             if (this.value === 'custom') {
+               customField.style.display = 'block';
+             } else {
+               customField.style.display = 'none';
+             }
+           });
+           
+           console.log('New residual readings entry modal created and should be visible');
+         }
+
+         function hideResidualReadingsModal() {
+           const residualReadingsModal = document.getElementById('residualReadingsModal');
+           if (residualReadingsModal) {
+             residualReadingsModal.remove();
+           }
+         }
+
+         function residualReadingsInputs() {
+           const location = document.getElementById('residualReadingsLocation').value;
+           const customLocation = document.getElementById('customResidualReadingsLocationName').value;
+           const value = document.getElementById('residualReadingsValue').value;
+           const date = document.getElementById('residualReadingsDate').value;
+           return { location, customLocation, value, date };
+         }
+
+         function renderResidualReadings(location, customLocation, value, date) {
+           const locationName = location === 'custom' ? customLocation : location;
+           document.getElementById('residualReadingsResult').innerHTML = `<div class='math'>Logged: ${locationName} - ${value} ft on ${date}</div>`;
+           
+           // If it's a custom location, add it to the custom locations list
+           if (location === 'custom' && customLocation && !customResidualReadingsLocations.includes(customLocation)) {
+             customResidualReadingsLocations.push(customLocation);
+             updateResidualReadingsLocationDropdowns();
+           }
+           
+           // Save residual readings data to Firebase
+           if (!residualReadingsDataByDate[date]) {
+             residualReadingsDataByDate[date] = {};
+           }
+           
+           // Store residual readings data by location (use locationName as key to avoid duplicates)
+           residualReadingsDataByDate[date][locationName] = {
+             value: value,
+             locationName: locationName,
+             timestamp: new Date().toISOString()
+           };
+           
+           saveUserData();
+           
+           // Update residual readings chart
+           loadResidualReadingsChart();
+         }
+
+         function loadResidualReadingsChart() {
+           updateResidualReadingsCharts();
+         }
+
+         function updateResidualReadingsCharts() {
+           const dates = Object.keys(residualReadingsDataByDate).sort();
+           
+           // First check if there's any data at all
+           if (dates.length === 0) {
+             // Show "no data" message for desktop chart
+             if (typeof residualReadingsChart !== 'undefined') {
+               residualReadingsChart.data.labels = ['No data to display yet'];
+               residualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               residualReadingsChart.update();
+             }
+             
+             // Show "no data" message for mobile chart
+             if (typeof mobileResidualReadingsChart !== 'undefined') {
+               mobileResidualReadingsChart.data.labels = ['No data to display yet'];
+               mobileResidualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               mobileResidualReadingsChart.update();
+             }
+             return;
+           }
+           
+           const twoMonthsAgo = new Date();
+           twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+           const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
+           
+           const filteredDates = dates.filter(date => date >= twoMonthsAgoStr);
+           const filteredLabels = filteredDates.map(date => {
+             const d = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
+             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+           });
+           
+           // Group data by location
+           const locationData = {};
+           filteredDates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 if (!locationData[locationName]) {
+                   locationData[locationName] = {
+                     label: dayData[locationName].locationName,
+                     data: [],
+                     borderColor: getLocationColor(Object.keys(locationData).length),
+                     backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
+                     tension: 0.1
+                   };
+                 }
+                 locationData[locationName].data.push(dayData[locationName].value);
+               }
+             });
+           });
+           
+           const datasets = Object.values(locationData);
+           
+           // Check if there's no data
+           if (datasets.length === 0) {
+             // Show "no data" message for desktop chart
+             if (typeof residualReadingsChart !== 'undefined') {
+               residualReadingsChart.data.labels = ['No data to display yet'];
+               residualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               residualReadingsChart.update();
+             }
+             
+             // Show "no data" message for mobile chart
+             if (typeof mobileResidualReadingsChart !== 'undefined') {
+               mobileResidualReadingsChart.data.labels = ['No data to display yet'];
+               mobileResidualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               mobileResidualReadingsChart.update();
+             }
+           } else {
+             // Update desktop chart with data
+             if (typeof residualReadingsChart !== 'undefined') {
+               residualReadingsChart.data.labels = filteredLabels;
+               residualReadingsChart.data.datasets = datasets;
+               residualReadingsChart.update();
+             }
+             
+             // Update mobile chart with data
+             if (typeof mobileResidualReadingsChart !== 'undefined') {
+               mobileResidualReadingsChart.data.labels = filteredLabels;
+               mobileResidualReadingsChart.data.datasets = datasets;
+               mobileResidualReadingsChart.update();
+             }
+           }
+         }
+
+         function updateResidualReadingsLocationDropdowns() {
+           // This function will be implemented later
+           console.log('updateResidualReadingsLocationDropdowns called');
+         }
+
+         function updateResidualReadingsChartsFullYear() {
+           const dates = Object.keys(residualReadingsDataByDate).sort();
+           const filteredLabels = dates.map(date => {
+             const d = new Date(date + 'T00:00:00'); // Add time to avoid timezone issues
+             return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+           });
+           
+           // Group data by location
+           const locationData = {};
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 if (!locationData[locationName]) {
+                   locationData[locationName] = {
+                     label: dayData[locationName].locationName,
+                     data: [],
+                     borderColor: getLocationColor(Object.keys(locationData).length),
+                     backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
+                     tension: 0.1
+                   };
+                 }
+                 locationData[locationName].data.push(dayData[locationName].value);
+               }
+             });
+           });
+           
+           const datasets = Object.values(locationData);
+           
+           // Check if there's no data
+           if (datasets.length === 0) {
+             // Show "no data" message for desktop chart
+             if (typeof residualReadingsChart !== 'undefined') {
+               residualReadingsChart.data.labels = ['No data to display yet'];
+               residualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               residualReadingsChart.update();
+             }
+             
+             // Show "no data" message for mobile chart
+             if (typeof mobileResidualReadingsChart !== 'undefined') {
+               mobileResidualReadingsChart.data.labels = ['No data to display yet'];
+               mobileResidualReadingsChart.data.datasets = [{
+                 label: 'No Data',
+                 data: [0],
+                 borderColor: 'transparent',
+                 backgroundColor: 'transparent',
+                 pointRadius: 0,
+                 pointHoverRadius: 0
+               }];
+               mobileResidualReadingsChart.update();
+             }
+           } else {
+             // Update desktop chart with data
+             if (typeof residualReadingsChart !== 'undefined') {
+               residualReadingsChart.data.labels = filteredLabels;
+               residualReadingsChart.data.datasets = datasets;
+               residualReadingsChart.update();
+             }
+             
+             // Update mobile chart with data
+             if (typeof mobileResidualReadingsChart !== 'undefined') {
+               mobileResidualReadingsChart.data.labels = filteredLabels;
+               mobileResidualReadingsChart.data.datasets = datasets;
+               mobileResidualReadingsChart.update();
+             }
+           }
+         }
+
+         function showResidualReadingsHistoryModal() {
+           console.log('showResidualReadingsHistoryModal called');
+           hideResidualReadingsMenu();
+           
+           // Create a completely new, simple modal that we know will work
+           const existingModal = document.getElementById('residualReadingsHistoryModal');
+           if (existingModal) {
+             existingModal.remove();
+           }
+           
+           // Create new modal
+           const newModal = document.createElement('div');
+           newModal.id = 'residualReadingsHistoryModal';
+           newModal.style.cssText = `
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background-color: rgba(0, 0, 0, 0.8);
+             z-index: 99999;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             padding: 20px;
+             box-sizing: border-box;
+           `;
+           
+           // Create modal content
+           const modalContent = document.createElement('div');
+           modalContent.style.cssText = `
+             background-color: #1f2937;
+             border-radius: 12px;
+             padding: 20px;
+             max-width: 90%;
+             max-height: 90vh;
+             overflow-y: auto;
+             color: white;
+             width: 100%;
+             box-sizing: border-box;
+           `;
+           
+           // Add content
+           modalContent.innerHTML = `
+             <div style="display: flex; align-items: center; margin-bottom: 20px;">
+               <div style="font-size: 24px; margin-right: 12px;">📊</div>
+               <div>
+                 <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Residual Readings History</h3>
+                 <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">View recorded residual reading data</p>
+               </div>
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Filter by Location</label>
+               <select id="residualReadingsHistoryLocation" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               ">
+                 <option value="">All Locations</option>
+               </select>
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Date Range</label>
+               <select id="residualReadingsHistoryDateRange" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               ">
+                 <option value="all">All Time</option>
+                 <option value="30">Last 30 days</option>
+                 <option value="90">Last 90 days</option>
+                 <option value="365">Last Year</option>
+               </select>
+             </div>
+             
+             <div id="residualReadingsHistoryContent" style="margin-bottom: 20px;">
+               <!-- History content will be loaded here -->
+             </div>
+             
+             <div style="display: flex; flex-direction: column; gap: 12px;">
+               <button id="exportResidualReadingsHistoryBtn" class="primary" style="width: 100%;">📊 Export to Excel</button>
+               <button id="closeResidualReadingsHistory" class="ghost" style="width: 100%;">Close</button>
+             </div>
+           `;
+           
+           newModal.appendChild(modalContent);
+           document.body.appendChild(newModal);
+           
+           // Load history data
+           loadResidualReadingsHistory();
+           
+           // Add event listeners
+           document.getElementById('closeResidualReadingsHistory').addEventListener('click', hideResidualReadingsHistoryModal);
+           document.getElementById('exportResidualReadingsHistoryBtn').addEventListener('click', exportResidualReadingsDataToExcel);
+           document.getElementById('residualReadingsHistoryLocation').addEventListener('change', loadResidualReadingsHistory);
+           document.getElementById('residualReadingsHistoryDateRange').addEventListener('change', loadResidualReadingsHistory);
+           
+           console.log('New residual readings history modal created and should be visible');
+         }
+
+         function hideResidualReadingsHistoryModal() {
+           const residualReadingsHistoryModal = document.getElementById('residualReadingsHistoryModal');
+           if (residualReadingsHistoryModal) {
+             residualReadingsHistoryModal.remove();
+           }
+         }
+
+         function loadResidualReadingsHistory() {
+           const locationFilter = document.getElementById('residualReadingsHistoryLocation')?.value || '';
+           const dateRangeFilter = document.getElementById('residualReadingsHistoryDateRange')?.value || 'all';
+           
+           const dates = Object.keys(residualReadingsDataByDate).sort();
+           
+           // Apply date filter
+           if (dateRangeFilter !== 'all') {
+             const cutoffDays = parseInt(dateRangeFilter);
+             const cutoffDate = new Date();
+             cutoffDate.setDate(cutoffDate.getDate() - cutoffDays);
+             const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+             dates = dates.filter(date => date >= cutoffDateStr);
+           }
+           
+           // Apply location filter
+           let filteredData = [];
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 // Check location filter
+                 if (!locationFilter || locationName === locationFilter) {
+                   filteredData.push({
+                     date,
+                     location: locationName,
+                     data: dayData[locationName]
+                   });
+                 }
+               }
+             });
+           });
+           
+           if (filteredData.length === 0) {
+             const noDataMessage = locationFilter || dateRangeFilter !== 'all' 
+               ? 'No data found for the selected filters'
+               : 'No residual readings data recorded yet';
+             document.getElementById('residualReadingsHistoryContent').innerHTML = `
+               <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                 <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                 <p style="margin: 0; font-size: 16px;">${noDataMessage}</p>
+               </div>
+             `;
+             return;
+           }
+           
+           // Sort by date (newest first)
+           filteredData.sort((a, b) => new Date(b.date) - new Date(a.date));
+           
+           let historyHTML = `
+             <div style="margin-bottom: 16px;">
+               <h4 style="color: #f3f4f6; margin: 0 0 12px 0;">Recent Residual Reading Entries</h4>
+             </div>
+             <div style="display: flex; flex-direction: column; gap: 12px;">
+           `;
+           
+           filteredData.forEach(entry => {
+             const formattedDate = new Date(entry.date).toLocaleDateString('en-US', { 
+               month: 'short', 
+               day: 'numeric', 
+               year: 'numeric' 
+             });
+             
+             historyHTML += `
+               <div style="
+                 background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+                 border: 1px solid #4b5563;
+                 border-radius: 12px;
+                 padding: 16px;
+                 display: flex;
+                 justify-content: space-between;
+                 align-items: center;
+                 transition: all 0.2s ease;
+                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+               " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.1)'">
+                 <div style="display: flex; flex-direction: column; gap: 4px;">
+                   <div style="font-weight: 600; color: #f3f4f6; font-size: 16px;">${entry.data.locationName}</div>
+                   <div style="color: #9ca3af; font-size: 14px;">${formattedDate}</div>
+                 </div>
+                 <div style="display: flex; align-items: center; gap: 12px;">
+                   <div style="
+                     background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                     color: white;
+                     padding: 8px 16px;
+                     border-radius: 20px;
+                     font-weight: 600;
+                     font-size: 14px;
+                     min-width: 80px;
+                     text-align: center;
+                   ">${entry.data.value} ft</div>
+                   <button onclick="deleteResidualReadingsEntry('${entry.date}', '${entry.data.locationName}')" style="
+                     background: #dc2626;
+                     color: white;
+                     border: none;
+                     border-radius: 6px;
+                     padding: 8px 12px;
+                     font-size: 12px;
+                     cursor: pointer;
+                     transition: all 0.2s ease;
+                   " onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                     🗑️ Delete
+                   </button>
+                 </div>
+               </div>
+             `;
+           });
+           
+           historyHTML += `
+               </div>
+             </div>
+           `;
+           
+           document.getElementById('residualReadingsHistoryContent').innerHTML = historyHTML;
+         }
+
+         function deleteResidualReadingsEntry(date, locationName) {
+           if (confirm('Are you sure you want to delete this residual reading entry?')) {
+             // Remove the entry from the data
+             if (residualReadingsDataByDate[date] && residualReadingsDataByDate[date][locationName]) {
+               delete residualReadingsDataByDate[date][locationName];
+               
+               // If no more entries for this date, remove the date entirely
+               if (Object.keys(residualReadingsDataByDate[date]).length === 0) {
+                 delete residualReadingsDataByDate[date];
+               }
+               
+               // Save to Firebase
+               saveUserData();
+               
+               // Reload the history to reflect changes
+               loadResidualReadingsHistory();
+               
+               // Update charts
+               updateResidualReadingsCharts();
+             }
+           }
+         }
+
+         function exportResidualReadingsDataToExcel() {
+           // Download the file immediately
+           downloadResidualReadingsCSV();
+           
+           // Also show email modal
+           showResidualReadingsEmailModal();
+         }
+
+         function downloadResidualReadingsCSV() {
+           const dates = Object.keys(residualReadingsDataByDate).sort();
+           const allData = [];
+           
+           // Add header row
+           allData.push(['Date', 'Location', 'Residual Reading (ft)', 'Timestamp']);
+           
+           // Add data rows
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 allData.push([
+                   date,
+                   dayData[locationName].locationName,
+                   dayData[locationName].value,
+                   dayData[locationName].timestamp || ''
+                 ]);
+               }
+             });
+           });
+           
+           // Convert to CSV format
+           const csvContent = allData.map(row => 
+             row.map(cell => `"${cell}"`).join(',')
+           ).join('\n');
+           
+           // Create and download file
+           const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+           const link = document.createElement('a');
+           const url = URL.createObjectURL(blob);
+           link.setAttribute('href', url);
+           link.setAttribute('download', `residual_readings_data_${todayStr()}.csv`);
+           link.style.visibility = 'hidden';
+           document.body.appendChild(link);
+           link.click();
+           document.body.removeChild(link);
+         }
+
+         function showResidualReadingsEmailModal() {
+           console.log('showResidualReadingsEmailModal called');
+           
+           // Create a completely new, simple modal that we know will work
+           const existingModal = document.getElementById('residualReadingsEmailModal');
+           if (existingModal) {
+             existingModal.remove();
+           }
+           
+           // Create new modal
+           const newModal = document.createElement('div');
+           newModal.id = 'residualReadingsEmailModal';
+           newModal.style.cssText = `
+             position: fixed;
+             top: 0;
+             left: 0;
+             width: 100vw;
+             height: 100vh;
+             background-color: rgba(0, 0, 0, 0.8);
+             z-index: 99999;
+             display: flex;
+             align-items: center;
+             justify-content: center;
+             padding: 20px;
+             box-sizing: border-box;
+           `;
+           
+           // Create modal content
+           const modalContent = document.createElement('div');
+           modalContent.style.cssText = `
+             background-color: #1f2937;
+             border-radius: 12px;
+             padding: 20px;
+             max-width: 90%;
+             max-height: 90vh;
+             overflow-y: auto;
+             color: white;
+             width: 100%;
+             box-sizing: border-box;
+           `;
+           
+           // Add content
+           modalContent.innerHTML = `
+             <div style="display: flex; align-items: center; margin-bottom: 20px;">
+               <div style="font-size: 24px; margin-right: 12px;">📧</div>
+               <div>
+                 <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Send Data via Email</h3>
+                 <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Enter email address to receive your residual readings data</p>
+               </div>
+             </div>
+             
+             <div style="margin-bottom: 20px;">
+               <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Email Address</label>
+               <input id="residualReadingsEmailAddress" type="email" placeholder="Enter email address" style="
+                 width: 100%;
+                 padding: 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+                 box-sizing: border-box;
+               " />
+             </div>
+             
+             <div id="residualReadingsEmailResult" style="margin-bottom: 16px;"></div>
+             
+             <div style="display: flex; flex-direction: column; gap: 12px;">
+               <button id="sendResidualReadingsEmailBtn" class="primary" style="width: 100%;">📧 Send Data</button>
+               <button id="closeResidualReadingsEmailModal" class="ghost" style="width: 100%;">Close</button>
+             </div>
+           `;
+           
+           newModal.appendChild(modalContent);
+           document.body.appendChild(newModal);
+           
+           // Add event listeners
+           document.getElementById('closeResidualReadingsEmailModal').addEventListener('click', hideResidualReadingsEmailModal);
+           document.getElementById('sendResidualReadingsEmailBtn').addEventListener('click', sendResidualReadingsDataViaEmail);
+           
+           console.log('New residual readings email modal created and should be visible');
+         }
+
+         function hideResidualReadingsEmailModal() {
+           const residualReadingsEmailModal = document.getElementById('residualReadingsEmailModal');
+           if (residualReadingsEmailModal) {
+             residualReadingsEmailModal.remove();
+           }
+         }
+
+         function sendResidualReadingsDataViaEmail() {
+           const emailAddress = document.getElementById('residualReadingsEmailAddress').value.trim();
+           const resultDiv = document.getElementById('residualReadingsEmailResult');
+           
+           if (!emailAddress) {
+             resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter an email address</p>';
+             return;
+           }
+           
+           if (!emailAddress.includes('@')) {
+             resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">Please enter a valid email address</p>';
+             return;
+           }
+           
+           // Show loading state
+           resultDiv.innerHTML = '<p style="color: #3b82f6; margin: 0;">Sending email...</p>';
+           document.getElementById('sendResidualReadingsEmailBtn').disabled = true;
+           document.getElementById('sendResidualReadingsEmailBtn').textContent = 'Sending...';
+           
+           // Prepare data
+           const dates = Object.keys(residualReadingsDataByDate).sort();
+           const allData = [];
+           
+           // Add header row
+           allData.push(['Date', 'Location', 'Residual Reading (ft)', 'Timestamp']);
+           
+           // Add data rows
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 allData.push([
+                   date,
+                   dayData[locationName].locationName,
+                   dayData[locationName].value,
+                   dayData[locationName].timestamp || ''
+                 ]);
+               }
+             });
+           });
+           
+           // Convert to CSV format
+           const csvContent = allData.map(row => 
+             row.map(cell => `"${cell}"`).join(',')
+           ).join('\n');
+           
+           // Create HTML table for email body - using more email-friendly HTML
+           let tableHTML = `
+             <table border="1" cellpadding="8" cellspacing="0" style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">
+               <tr style="background-color: #f2f2f2;">
+                 <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Date</th>
+                 <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Location</th>
+                 <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Residual Reading (ft)</th>
+                 <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Timestamp</th>
+               </tr>
+           `;
+           
+           // Add data rows
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 const timestamp = dayData[locationName].timestamp ? 
+                   new Date(dayData[locationName].timestamp).toLocaleString() : '';
+                 tableHTML += `
+                   <tr>
+                     <td style="border: 1px solid #ddd; padding: 8px;">${date}</td>
+                     <td style="border: 1px solid #ddd; padding: 8px;">${dayData[locationName].locationName}</td>
+                     <td style="border: 1px solid #ddd; padding: 8px;">${dayData[locationName].value}</td>
+                     <td style="border: 1px solid #ddd; padding: 8px;">${timestamp}</td>
+                   </tr>
+                 `;
+               }
+             });
+           });
+           
+           tableHTML += `
+             </table>
+           `;
+           
+           // Create a simple text table as backup
+           let textTable = `
+Residual Readings Data
+=====================
+
+Date         | Location | Residual Reading (ft) | Timestamp
+-------------|----------|----------------------|------------------
+           `;
+           
+           dates.forEach(date => {
+             const dayData = residualReadingsDataByDate[date];
+             Object.keys(dayData).forEach(locationName => {
+               if (dayData[locationName] && dayData[locationName].value) {
+                 const timestamp = dayData[locationName].timestamp ? 
+                   new Date(dayData[locationName].timestamp).toLocaleString() : '';
+                 textTable += `${date.padEnd(12)} | ${locationName.padEnd(8)} | ${dayData[locationName].value.toString().padEnd(20)} | ${timestamp}\n`;
+               }
+             });
+           });
+           
+           textTable += `
+=====================
+           `;
+           
+           // Send email using EmailJS
+           const templateParams = {
+             user_email: emailAddress,
+             to_email: emailAddress,
+             email: emailAddress,
+             from_name: 'WaterData App',
+             subject: `Residual Readings Data - ${todayStr()}`,
+             message: `Please find your residual readings data below, exported on ${new Date().toLocaleDateString()}.`,
+             table_data: tableHTML,
+             text_table: textTable,
+             csv_content: csvContent,
+             export_date: new Date().toLocaleDateString()
+           };
+           
+           console.log('Sending residual readings email with params:', templateParams);
+           console.log('Email address being sent:', emailAddress);
+           console.log('Table HTML being sent:', tableHTML);
+           
+           emailjs.send('service_tr7srcd', 'template_6er1sgu', templateParams)
+             .then(function(response) {
+               console.log('Email sent successfully:', response);
+               resultDiv.innerHTML = '<p style="color: #10b981; margin: 0;">✅ Email sent successfully!</p>';
+               document.getElementById('sendResidualReadingsEmailBtn').textContent = 'Email Sent!';
+               
+               // Close modal after 2 seconds
+               setTimeout(() => {
+                 hideResidualReadingsEmailModal();
+               }, 2000);
+             })
+             .catch(function(error) {
+               console.error('Email sending failed:', error);
+               resultDiv.innerHTML = '<p style="color: #ef4444; margin: 0;">❌ Failed to send email. Please try again.</p>';
+               document.getElementById('sendResidualReadingsEmailBtn').disabled = false;
+               document.getElementById('sendResidualReadingsEmailBtn').textContent = '📧 Send Data';
+             });
+         }
+
          // ===== Charts =====
      let totalCtx=document.getElementById('totalChart').getContext('2d');
      let totalChart=new Chart(totalCtx,{
@@ -4382,6 +5829,25 @@ Date         | Location | Meter Read (ft) | Timestamp
          {label:'Meter Reads (ft)',data:[],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Meter Reads (ft)'}}}}
+     });
+
+     // Residual Readings Charts
+     let residualReadingsCtx=document.getElementById('residualReadingsChart').getContext('2d');
+     let residualReadingsChart=new Chart(residualReadingsCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Residual Readings (ft)',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Residual Readings (ft)'}}}}
+     });
+
+     let mobileResidualReadingsCtx=document.getElementById('mobileResidualReadingsChart').getContext('2d');
+     let mobileResidualReadingsChart=new Chart(mobileResidualReadingsCtx,{
+       type:'line',
+       data:{labels:[],datasets:[
+         {label:'Residual Readings (ft)',data:[],borderColor:'#f59e0b',backgroundColor:'rgba(245,158,11,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+       ]},
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Residual Readings (ft)'}}}}
      });
 
      // Mobile Food Chart
@@ -5167,7 +6633,7 @@ Date         | Location | Meter Read (ft) | Timestamp
            
            const filteredLabels = labels.filter(date => date >= twoMonthsAgoStr);
            
-           // Group by location for better visualization
+           // Group by locationName for better visualization
            const locationData = {};
            const allLocations = new Set();
            
@@ -5176,11 +6642,12 @@ Date         | Location | Meter Read (ft) | Timestamp
              if (dayData) {
                Object.keys(dayData).forEach(location => {
                  if (dayData[location] && dayData[location].level) {
-                   allLocations.add(location);
-                   if (!locationData[location]) {
-                     locationData[location] = [];
+                   const locationName = dayData[location].locationName;
+                   allLocations.add(locationName);
+                   if (!locationData[locationName]) {
+                     locationData[locationName] = [];
                    }
-                   locationData[location].push({
+                   locationData[locationName].push({
                      date: date,
                      level: dayData[location].level,
                      locationName: dayData[location].locationName
@@ -5194,9 +6661,15 @@ Date         | Location | Meter Read (ft) | Timestamp
            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
            const datasets = Array.from(allLocations).map((location, index) => {
              const locationPoints = locationData[location] || [];
-             const dataPoints = filteredLabels.map(date => {
+             
+             // Create data points with actual values only
+             const dataPoints = [];
+             
+             filteredLabels.forEach(date => {
                const point = locationPoints.find(p => p.date === date);
-               return point ? point.level : null;
+               if (point) {
+                 dataPoints.push(point.level);
+               }
              });
              
              return {
@@ -5206,8 +6679,8 @@ Date         | Location | Meter Read (ft) | Timestamp
                backgroundColor: colors[index % colors.length] + '20',
                fill: false,
                tension: 0.25,
-               pointRadius: 4,
-               pointHoverRadius: 6
+               pointRadius: 6,
+               pointHoverRadius: 9
              };
            });
 
@@ -5445,7 +6918,7 @@ Date         | Location | Meter Read (ft) | Timestamp
      function updateChartsFullYear() {
        const labels = getAllDates();
        
-       // Group by location for full year visualization
+       // Group by locationName for full year visualization
        const locationData = {};
        const allLocations = new Set();
        
@@ -5454,11 +6927,12 @@ Date         | Location | Meter Read (ft) | Timestamp
          if (dayData) {
            Object.keys(dayData).forEach(location => {
              if (dayData[location] && dayData[location].level) {
-               allLocations.add(location);
-               if (!locationData[location]) {
-                 locationData[location] = [];
+               const locationName = dayData[location].locationName;
+               allLocations.add(locationName);
+               if (!locationData[locationName]) {
+                 locationData[locationName] = [];
                }
-               locationData[location].push({
+               locationData[locationName].push({
                  date: date,
                  level: dayData[location].level,
                  locationName: dayData[location].locationName
@@ -6006,6 +7480,8 @@ Date         | Location | Meter Read (ft) | Timestamp
        // Meter reads event listeners
        document.getElementById('showMeterReads').addEventListener('click', showMeterReadsMenu);
        document.getElementById('mobileShowMeterReads').addEventListener('click', showMeterReadsMenu);
+       document.getElementById('showResidualReadings').addEventListener('click', showResidualReadingsMenu);
+       document.getElementById('mobileShowResidualReadings').addEventListener('click', showResidualReadingsMenu);
        // closeMeterReadsMenu, openMeterReadsEntry, openMeterReadsHistory are created dynamically
        // closeMeterReads, meterReadsCalc, manageMeterReadsLocations are created dynamically
        // closeMeterReadsHistory, exportMeterReadsHistoryBtn, meterReadsHistoryLocation, meterReadsHistoryDateRange are created dynamically
@@ -6026,6 +7502,28 @@ Date         | Location | Meter Read (ft) | Timestamp
            button.textContent = 'Show Less';
          } else {
            updateMeterReadsCharts();
+           button.textContent = 'Show More';
+         }
+       });
+       
+       // Residual readings toggle buttons
+       document.getElementById('toggleResidualReadingsLocation').addEventListener('click', function() {
+         const button = document.getElementById('toggleResidualReadingsLocation');
+         if (button.textContent === 'Show More') {
+           updateResidualReadingsChartsFullYear();
+           button.textContent = 'Show Less';
+         } else {
+           updateResidualReadingsCharts();
+           button.textContent = 'Show More';
+         }
+       });
+       document.getElementById('mobileToggleResidualReadingsLocation').addEventListener('click', function() {
+         const button = document.getElementById('mobileToggleResidualReadingsLocation');
+         if (button.textContent === 'Show More') {
+           updateResidualReadingsChartsFullYear();
+           button.textContent = 'Show Less';
+         } else {
+           updateResidualReadingsCharts();
            button.textContent = 'Show More';
          }
        });
