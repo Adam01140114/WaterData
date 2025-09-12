@@ -58,7 +58,7 @@
     }
     
     .modal-overlay.hidden {
-      display: none !important;
+      display: none;
     }
     
     /* always above slides/titles on mobile */
@@ -713,7 +713,7 @@
      <!-- Mobile Container -->
      <div class="mobile-container">
        <!-- Mobile Title -->
-       <div class="mobile-title">Smart Calorie Tracker</div>
+       <div class="mobile-title">Water Data Logger</div>
        
       
        <div class="mobile-slide active" id="mobile-slide-1">
@@ -778,19 +778,19 @@
        
          <div class="mobile-slide-content">
 
-          <h2>Calories Burnt With Workout</h2>
-           <canvas id="mobileWorkoutChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWorkoutFat">Show Fat Loss</button>
-           <button class="primary" id="mobileShowWorkouts">Show Workouts</button>
+          <h2>Water Level (ft)</h2>
+           <canvas id="mobileWaterLevelChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleWaterLevelLocation">Show More</button>
+           <button class="primary" id="mobileShowWaterLevels">Add Water Level</button>
 
            <br><br>
            <hr style="border: none; height: 1px; background: rgba(255,255,255,0.1); margin: 20px 0;">
            <br>
            
-           <h2>Weight Trajectory</h2>
-           <canvas id="mobileWeightChart" height="200"></canvas>
-           <button class="ghost" id="mobileToggleWeightFat">Show Fat Loss</button>
-           <button class="primary" id="mobileAddWeightBtn">Edit Weight</button>
+           <h2>Meter Reads (ft)</h2>
+           <canvas id="mobileMeterReadsChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleMeterReadsLocation">Show More</button>
+           <button class="primary" id="mobileShowMeterReads">Add Meter Read</button>
            
          </div>
        </div>
@@ -1065,93 +1065,216 @@
        </div>
      </div>
 
-     <!-- Mobile Workout Menu Modal -->
-     <div id="mobileWorkoutModal" class="modal-overlay hidden">
+     <!-- Mobile Water Level Menu Modal -->
+     <div id="mobileWaterLevelMenuModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
-           <div class="modal-icon">🏋️</div>
+           <div class="modal-icon">💧</div>
            <div>
-             <h3 class="modal-title">Choose a Workout</h3>
-             <p class="modal-subtitle">Select your workout type</p>
+             <h3 class="modal-title">Water Level Actions</h3>
+             <p class="modal-subtitle">Choose what you want to do</p>
            </div>
          </div>
          <div class="menu-grid" style="margin-bottom: 20px;">
            <div class="menu-tile" id="mobileOpenTreadmill">
-             <div class="menu-emoji">🏃‍♂️</div>
-             <div>Treadmill</div>
+             <div class="menu-emoji">💧</div>
+             <div>Add Water Level</div>
            </div>
            <div class="menu-tile" id="mobileOpenStairs">
-             <div class="menu-emoji">🧗</div>
-             <div>Stair Master</div>
+             <div class="menu-emoji">📊</div>
+             <div>View History</div>
            </div>
          </div>
          <div class="user-actions">
-           <button class="ghost" id="closeMobileWorkoutMenu">Close</button>
+           <button class="ghost" id="closeMobileWaterLevelMenu">Close</button>
          </div>
        </div>
      </div>
 
-     <!-- Mobile Treadmill Modal -->
-     <div id="mobileTreadmillModal" class="modal-overlay hidden">
+     <!-- Mobile Water Level Modal -->
+     <div id="mobileWaterLevelModal" class="modal-overlay hidden">
        <div class="modal">
          <div class="modal-header">
-           <div class="modal-icon">🏃‍♂️</div>
+           <div class="modal-icon">💧</div>
            <div>
-             <h3 class="modal-title">Treadmill Calories</h3>
-             <p class="modal-subtitle">ACSM Walking Equation</p>
+             <h3 class="modal-title">Water Level Entry</h3>
+             <p class="modal-subtitle">Record water level data</p>
            </div>
          </div>
          <div class="field">
-           <label class="label" for="mobileTspeed">Speed (mph)</label>
-           <input id="mobileTspeed" type="number" step="0.1" placeholder="3.5" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileTgrade">Incline (%)</label>
-           <input id="mobileTgrade" type="number" step="0.1" placeholder="7.5" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileTdur">Duration (min)</label>
-           <input id="mobileTdur" type="number" placeholder="30" />
-         </div>
-         <div class="result" id="mobileTresult"></div>
-         <div class="user-actions">
-           <button class="primary" id="mobileTcalc">Log Calories</button>
-           <button class="ghost" id="closeMobileTreadmill">Close</button>
-         </div>
-       </div>
-     </div>
-
-     <!-- Mobile Stairs Modal -->
-     <div id="mobileStairsModal" class="modal-overlay hidden">
-       <div class="modal">
-         <div class="modal-header">
-           <div class="modal-icon">🧗</div>
-           <div>
-             <h3 class="modal-title">Stair Master Calories</h3>
-             <p class="modal-subtitle">MET Method</p>
-           </div>
-         </div>
-         <div class="field">
-           <label class="label" for="mobileSdur">Duration (min)</label>
-           <input id="mobileSdur" type="number" placeholder="20" />
-         </div>
-         <div class="field">
-           <label class="label" for="mobileSintensity">Intensity</label>
-           <select id="mobileSintensity">
-             <option value="6">Easy · 6 MET</option>
-             <option value="8.8" selected>Moderate · 8.8 MET</option>
-             <option value="10.3">Hard · 10.3 MET</option>
-             <option value="custom">Custom MET</option>
+           <label class="label" for="mobileWaterLocation">Location</label>
+           <select id="mobileWaterLocation">
+             <option value="">Select a location</option>
+             <option value="lake_erie">Lake Erie</option>
+             <option value="lake_ontario">Lake Ontario</option>
+             <option value="lake_huron">Lake Huron</option>
+             <option value="lake_michigan">Lake Michigan</option>
+             <option value="lake_superior">Lake Superior</option>
+             <option value="ohio_river">Ohio River</option>
+             <option value="mississippi_river">Mississippi River</option>
+             <option value="custom">Custom Location</option>
            </select>
          </div>
-         <div class="field hidden" id="mobileCustomMetField">
-           <label class="label" for="mobileScustom">Custom MET</label>
-           <input id="mobileScustom" type="number" step="0.1" placeholder="9.5" />
+         <div class="field hidden" id="mobileCustomLocationField">
+           <label class="label" for="mobileCustomLocationName">Custom Location Name</label>
+           <input id="mobileCustomLocationName" type="text" placeholder="Enter location name" />
          </div>
-         <div class="result" id="mobileSresult"></div>
+         <div class="field">
+           <label class="label" for="mobileWaterLevel">Water Level (ft)</label>
+           <input id="mobileWaterLevel" type="number" step="0.01" placeholder="0.00" />
+         </div>
+         <div class="field">
+           <label class="label" for="mobileWaterDate">Date</label>
+           <input id="mobileWaterDate" type="date" />
+         </div>
+         <button class="ghost" id="mobileManageLocations" style="margin-bottom: 16px;">📍 Edit Locations</button>
+         <div class="result" id="mobileWaterResult"></div>
          <div class="user-actions">
-           <button class="primary" id="mobileScalc">Log Calories</button>
-           <button class="ghost" id="closeMobileStairs">Close</button>
+           <button class="primary" id="mobileWaterCalc">Log Water Level</button>
+           <button class="ghost" id="closeMobileWaterLevel">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Locations Management Modal -->
+     <div id="locationsModal" class="modal-overlay" style="display: none;">
+       <div class="modal-content" style="max-width: 500px;">
+         <div class="modal-header">
+           <div>
+             <h3 class="modal-title">Manage Water Level Locations</h3>
+             <p class="modal-subtitle">Add or remove custom locations for water level tracking</p>
+           </div>
+         </div>
+         <div class="locations-content" style="padding: 20px;">
+           <div class="add-location-section" style="margin-bottom: 24px;">
+             <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Add New Location</h4>
+             <div class="field" style="margin-bottom: 12px;">
+               <input id="newLocationName" type="text" placeholder="Enter location name (e.g., Lake Tahoe)" style="
+                 width: 100%;
+                 padding: 10px 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+               " />
+             </div>
+             <button id="addLocationBtn" class="primary" style="width: 100%;" Add Location</button>
+           </div>
+           
+           <div class="existing-locations-section">
+             <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Your Locations</h4>
+             <div id="locationsList" style="max-height: 300px; overflow-y: auto;">
+               <!-- Locations will be populated here -->
+             </div>
+           </div>
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="closeLocationsModal">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Meter Reads Menu Modal - Created dynamically to avoid mobile visibility issues -->
+
+     <!-- Meter Reads Entry Modal - Created dynamically to avoid mobile visibility issues -->
+
+     <!-- Meter Reads History Modal - Created dynamically to avoid mobile visibility issues -->
+
+     <!-- Meter Reads Locations Management Modal -->
+     <div id="meterReadsLocationsModal" class="modal-overlay hidden">
+       <div class="modal-content" style="max-width: 500px;">
+         <div class="modal-header">
+           <div>
+             <h3 class="modal-title">Manage Meter Reads Locations</h3>
+             <p class="modal-subtitle">Add or remove custom locations for meter reading tracking</p>
+           </div>
+         </div>
+         <div class="locations-content" style="padding: 20px;">
+           <div class="add-location-section" style="margin-bottom: 24px;">
+             <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Add New Location</h4>
+             <div class="field" style="margin-bottom: 12px;">
+               <input id="newMeterReadsLocationName" type="text" placeholder="Enter location name (e.g., Building A)" style="
+                 width: 100%;
+                 padding: 10px 12px;
+                 background: #374151;
+                 border: 1px solid #4b5563;
+                 border-radius: 6px;
+                 color: #f9fafb;
+                 font-size: 14px;
+               " />
+             </div>
+             <button id="addMeterReadsLocationBtn" class="primary" style="width: 100%;">➕ Add Location</button>
+           </div>
+           
+           <div class="existing-locations-section">
+             <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Your Locations</h4>
+             <div id="meterReadsLocationsList" style="max-height: 300px; overflow-y: auto;">
+               <!-- Locations will be populated here -->
+             </div>
+           </div>
+         </div>
+         <div class="user-actions">
+           <button class="ghost" id="closeMeterReadsLocationsModal">Close</button>
+         </div>
+       </div>
+     </div>
+
+     <!-- Mobile Water History Modal -->
+     <div id="mobileWaterHistoryModal" class="modal-overlay hidden">
+       <div class="modal">
+         <div class="modal-header">
+           <div class="modal-icon">📊</div>
+           <div>
+             <h3 class="modal-title">Water Level History</h3>
+             <p class="modal-subtitle">View recorded water level data</p>
+           </div>
+         </div>
+         <div class="filter-controls" style="margin-bottom: 20px;">
+           <div class="field" style="margin-bottom: 12px;">
+             <label class="label" for="mobileHistoryLocation" style="color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Filter by Location</label>
+             <select id="mobileHistoryLocation" style="
+               width: 100%;
+               padding: 8px 12px;
+               background: #374151;
+               border: 1px solid #4b5563;
+               border-radius: 6px;
+               color: #f9fafb;
+               font-size: 14px;
+             ">
+               <option value="">All Locations</option>
+               <option value="lake_erie">Lake Erie</option>
+               <option value="lake_ontario">Lake Ontario</option>
+               <option value="lake_huron">Lake Huron</option>
+               <option value="lake_michigan">Lake Michigan</option>
+               <option value="lake_superior">Lake Superior</option>
+               <option value="ohio_river">Ohio River</option>
+               <option value="mississippi_river">Mississippi River</option>
+             </select>
+         </div>
+         <div class="field">
+             <label class="label" for="mobileHistoryDateRange" style="color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Date Range</label>
+             <select id="mobileHistoryDateRange" style="
+               width: 100%;
+               padding: 8px 12px;
+               background: #374151;
+               border: 1px solid #4b5563;
+               border-radius: 6px;
+               color: #f9fafb;
+               font-size: 14px;
+             ">
+               <option value="7">Last 7 days</option>
+               <option value="30" selected>Last 30 days</option>
+               <option value="90">Last 90 days</option>
+               <option value="365">Last year</option>
+               <option value="all">All time</option>
+           </select>
+         </div>
+         </div>
+         <div class="result" id="mobileWaterHistoryResult"></div>
+         <div class="user-actions">
+           <button class="primary" id="exportWaterHistoryBtn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(16, 185, 129, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">📊 Export to Excel</button>
+           <button class="ghost" id="closeMobileWaterHistory">Close</button>
          </div>
        </div>
      </div>
@@ -1267,85 +1390,105 @@
         <button class="primary" id="addCaloriesBtn">Add Calories</button>
       </section>
 
-             <!-- Weight Trajectory -->
+             <!-- Meter Reads -->
        <section class="card">
-         <h2>Weight Trajectory</h2>
-         <canvas id="weightChart" height="200"></canvas>
-         <button class="ghost" id="toggleWeightFat">Show Fat Loss</button>
-         <button class="primary" id="addWeightBtn">Add Weight</button>
+         <h2>Meter Reads (ft)</h2>
+         <canvas id="meterReadsChart" height="200"></canvas>
+         <button class="ghost" id="toggleMeterReadsLocation">Show More</button>
+         <button class="primary" id="showMeterReads">Add Meter Read</button>
        </section>
 
       <!-- Workouts Menu (hidden by default) -->
       <section class="card hidden" id="workoutMenu">
-        <h2>Choose a Workout</h2>
+        <h2>Choose Water Level Action</h2>
         <div class="menu-grid">
           <div class="menu-tile" id="openTreadmill">
-            <div class="menu-emoji">🏃‍♂️</div>
-            <div>Treadmill</div>
+            <div class="menu-emoji">💧</div>
+            <div>Add Water Level</div>
           </div>
           <div class="menu-tile" id="openStairs">
-            <div class="menu-emoji">🧗</div>
-            <div>Stair Master</div>
+            <div class="menu-emoji">📊</div>
+            <div>View History</div>
           </div>
         </div>
-        <button class="ghost" id="hideWorkouts">Hide Workouts</button>
+        <button class="ghost" id="hideWorkouts">Hide Water Levels</button>
       </section>
 
              <!-- Show/Hide Workouts Button -->
-       <section class="card" id="workoutToggleSection">
-         <h2>Calories Burnt With Workouts</h2>
-         <canvas id="workoutChart" height="200"></canvas>
-         <button class="ghost" id="toggleWorkoutFat">Show Fat Loss</button>
-         <button class="primary" id="showWorkouts">Show Workouts</button>
+       <section class="card" id="waterLevelToggleSection">
+         <h2>Water Level (ft)</h2>
+         <canvas id="waterLevelChart" height="200"></canvas>
+         <button class="ghost" id="toggleWaterLevelLocation">Show More</button>
+         <button class="primary" id="showWaterLevels">Add Water Level</button>
        </section>
 
-                            <!-- Treadmill Section -->
-       <section class="card hidden" id="treadmillSection">
-        <h2>Treadmill Calories · ACSM Walking Equation</h2>
+                            <!-- Water Level Entry Section -->
+       <section class="card hidden" id="waterLevelSection">
+        <h2>Water Level Entry</h2>
         <div class="field">
-          <label class="label" for="tspeed">Speed (mph)</label>
-          <input id="tspeed" type="number" step="0.1" placeholder="3.5" />
-        </div>
-        <div class="field">
-          <label class="label" for="tgrade">Incline (%)</label>
-          <input id="tgrade" type="number" step="0.1" placeholder="7.5" />
-        </div>
-        <div class="field">
-          <label class="label" for="tdur">Duration (min)</label>
-          <input id="tdur" type="number" placeholder="30" />
-        </div>
-                 <div class="result" id="tresult"></div>
-         <button class="primary" id="tcalc">Log Calories</button>
-         <canvas id="tchart" height="200"></canvas>
-         <button class="ghost" id="toggleTreadmillFat">Show Fat Loss</button>
-         <button class="primary" id="backFromTreadmill">Back</button>
-      </section>
-
-      <!-- Stair Master Section -->
-      <section class="card hidden" id="stairSection">
-        <h2>Stair Master Calories · MET Method</h2>
-        <div class="field">
-          <label class="label" for="sdur">Duration (min)</label>
-          <input id="sdur" type="number" placeholder="20" />
-        </div>
-        <div class="field">
-          <label class="label" for="sintensity">Intensity</label>
-          <select id="sintensity">
-            <option value="6">Easy · 6 MET</option>
-            <option value="8.8" selected>Moderate · 8.8 MET</option>
-            <option value="10.3">Hard · 10.3 MET</option>
-            <option value="custom">Custom MET</option>
+          <label class="label" for="waterLocation">Location</label>
+          <select id="waterLocation">
+            <option value="">Select a location</option>
+            <option value="lake_erie">Lake Erie</option>
+            <option value="lake_ontario">Lake Ontario</option>
+            <option value="lake_huron">Lake Huron</option>
+            <option value="lake_michigan">Lake Michigan</option>
+            <option value="lake_superior">Lake Superior</option>
+            <option value="ohio_river">Ohio River</option>
+            <option value="mississippi_river">Mississippi River</option>
+            <option value="custom">Custom Location</option>
           </select>
         </div>
-        <div class="field hidden" id="customMetField">
-          <label class="label" for="scustom">Custom MET</label>
-          <input id="scustom" type="number" step="0.1" placeholder="9.5" />
+        <div class="field hidden" id="customLocationField">
+          <label class="label" for="customLocationName">Custom Location Name</label>
+          <input id="customLocationName" type="text" placeholder="Enter location name" />
         </div>
-                 <div class="result" id="sresult"></div>
-         <button class="primary" id="scalc">Log Calories</button>
-         <canvas id="schart" height="200"></canvas>
-         <button class="ghost" id="toggleStairsFat">Show Fat Loss</button>
-                  <button class="primary" id="backFromStairs">Back</button>
+        <div class="field">
+          <label class="label" for="waterLevel">Water Level (ft)</label>
+          <input id="waterLevel" type="number" step="0.01" placeholder="0.00" />
+        </div>
+        <div class="field">
+           <label class="label" for="waterDate">Date</label>
+           <input id="waterDate" type="date" />
+        </div>
+         <button class="ghost" id="manageLocations" style="margin-bottom: 16px;">📍Edit Locations</button>
+        <div class="result" id="waterResult"></div>
+        <button class="primary" id="waterCalc">Log Water Level</button>
+        <canvas id="waterChart" height="200"></canvas>
+        <button class="ghost" id="toggleWaterLocation">Show by Location</button>
+        <button class="primary" id="backFromWater">Back</button>
+      </section>
+
+      <!-- Water Level History Section -->
+      <section class="card hidden" id="waterHistorySection">
+        <h2>Water Level History</h2>
+        <div class="field">
+          <label class="label" for="historyLocation">Filter by Location</label>
+          <select id="historyLocation">
+            <option value="">All Locations</option>
+            <option value="lake_erie">Lake Erie</option>
+            <option value="lake_ontario">Lake Ontario</option>
+            <option value="lake_huron">Lake Huron</option>
+            <option value="lake_michigan">Lake Michigan</option>
+            <option value="lake_superior">Lake Superior</option>
+            <option value="ohio_river">Ohio River</option>
+            <option value="mississippi_river">Mississippi River</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label" for="historyDateRange">Date Range</label>
+          <select id="historyDateRange">
+            <option value="7">Last 7 days</option>
+            <option value="30" selected>Last 30 days</option>
+            <option value="90">Last 90 days</option>
+            <option value="365">Last year</option>
+            <option value="all">All time</option>
+          </select>
+        </div>
+        <div class="result" id="waterHistoryResult"></div>
+        <canvas id="waterHistoryChart" height="200"></canvas>
+        <button class="ghost" id="toggleWaterHistoryLocation">Show by Location</button>
+        <button class="primary" id="backFromWaterHistory">Back</button>
        </section>
 
        <!-- Settings and Logout Section -->
@@ -1365,6 +1508,20 @@
    </div>
 
   <script>
+    // ===== State Variables =====
+    let bmr=0;
+    let basalByDate={};     // date -> BMR for that date
+    let activityByDate={};  // date -> sum of activity kcal for that date
+    let weightByDate={};    // date -> weight for that date
+    let waterLevelDataByDate={}; // date -> water level data for that date
+    let customLocations = []; // user's custom water level locations
+    let meterReadsDataByDate={}; // date -> meter reads data for that date
+    let customMeterReadsLocations = []; // user's custom meter reads locations
+    let foodDataByDate={};  // date -> food data for that date
+    let customFoods={};     // custom food name -> {name, calories, icon}
+    let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
+    let currentTheme = 'dark'; // current theme setting
+
     // ===== Firebase Configuration =====
     const firebaseConfig = {
       apiKey: "AIzaSyCgu5VzQcD0hPEpcslrizbiat_Q8VKPa3I",
@@ -1390,9 +1547,9 @@
         'addCaloriesModal',
         'weightLoggingModal',
         'addWeightModal',
-        'mobileWorkoutModal',
-        'mobileTreadmillModal',
-        'mobileStairsModal',
+        'mobileWaterLevelMenuModal',
+        'mobileWaterLevelModal',
+        'mobileWaterHistoryModal',
         'mobileFoodModal',
         'mobileCustomFoodModal'
       ];
@@ -1469,12 +1626,10 @@
        weightLoggingModal.classList.add('hidden');
        
        // Hide mobile modals
-       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
-       mobileWorkoutModal.classList.add('hidden');
-       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
-       mobileTreadmillModal.classList.add('hidden');
-       const mobileStairsModal = document.getElementById('mobileStairsModal');
-       mobileStairsModal.classList.add('hidden');
+       const mobileWaterLevelMenuModal = document.getElementById('mobileWaterLevelMenuModal');
+       mobileWaterLevelMenuModal.classList.add('hidden');
+       const mobileWaterHistoryModal = document.getElementById('mobileWaterHistoryModal');
+       mobileWaterHistoryModal.classList.add('hidden');
        
        document.getElementById('appContent').classList.add('hidden');
      }
@@ -1827,65 +1982,7 @@
      });
 
      // ===== Add Weight Modal Event Listeners =====
-     document.getElementById('addWeightBtn').addEventListener('click', showAddWeightModal);
-     document.getElementById('cancelAddWeight').addEventListener('click', hideAddWeightModal);
-     document.getElementById('submitAddWeight').addEventListener('click', async () => {
-       const weight = Number(document.getElementById('weightAmount').value);
-       const date = document.getElementById('weightDate').value;
-       const errorDiv = document.getElementById('addWeightError');
-       const successDiv = document.getElementById('addWeightSuccess');
-       
-       if (!weight || !date) {
-         errorDiv.textContent = 'Please fill in all fields';
-         errorDiv.classList.remove('hidden');
-         successDiv.classList.add('hidden');
-         return;
-       }
-       
-       if (weight <= 0) {
-         errorDiv.textContent = 'Please enter a valid weight';
-         errorDiv.classList.remove('hidden');
-         successDiv.classList.add('hidden');
-         return;
-       }
-       
-       try {
-         addWeightForDate(weight, date);
-         
-         // If this is today's weight, update the user profile
-         const today = todayStr();
-         if (date === today && userProfile) {
-           userProfile.weight = weight;
-           userProfile.bmr = calcBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
-           
-           // Save updated profile to Firebase
-           await db.collection('users').doc(currentUser.uid).update(userProfile);
-           
-           // Update BMR calculation for today
-           renderBMR(userProfile.age, weight, userProfile.heightFt, userProfile.heightIn);
-           
-           // Update settings modal if it's open
-           const settingsWeightInput = document.getElementById('settingsWeight');
-           if (settingsWeightInput) {
-             settingsWeightInput.value = weight;
-           }
-         }
-         
-         errorDiv.classList.add('hidden');
-         successDiv.textContent = 'Weight logged successfully!';
-         successDiv.classList.remove('hidden');
-         
-         setTimeout(() => {
-           hideAddWeightModal();
-           // Reset mobile container to prevent "pushed up" state
-           resetMobileContainer();
-         }, 1500);
-       } catch (error) {
-         errorDiv.textContent = error.message;
-         errorDiv.classList.remove('hidden');
-         successDiv.classList.add('hidden');
-       }
-     });
+     // Removed - weight module replaced with meter reads module
 
     // ===== Data Management =====
          async function loadUserData() {
@@ -1901,13 +1998,21 @@
            basalByDate = data.basalByDate || {};
            activityByDate = data.activityByDate || {};
            weightByDate = data.weightByDate || {};
-           workoutDataByDate = data.workoutDataByDate || {};
+           waterLevelDataByDate = data.waterLevelDataByDate || {};
+           customLocations = data.customLocations || [];
+           meterReadsDataByDate = data.meterReadsDataByDate || {};
+           customMeterReadsLocations = data.customMeterReadsLocations || [];
            foodDataByDate = data.foodDataByDate || {};
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
            currentTheme = data.currentTheme || 'dark';
            
-           console.log('Loaded workoutDataByDate:', workoutDataByDate);
+           console.log('Loaded waterLevelDataByDate:', waterLevelDataByDate);
+           console.log('Loaded customLocations:', customLocations);
+           
+       // Update location dropdowns with custom locations
+       updateLocationDropdowns();
+       updateMeterReadsLocationDropdowns();
            
            // Load streak data if it exists
            if (data.streakData) {
@@ -1915,6 +2020,10 @@
              // Convert workoutDates back to Set if it exists
              if (data.streakData.workoutDates) {
                streakData.workoutDates = new Set(data.streakData.workoutDates);
+             }
+             // Convert waterLevelDates back to Set if it exists
+             if (data.streakData.waterLevelDates) {
+               streakData.waterLevelDates = new Set(data.streakData.waterLevelDates);
              }
            }
            
@@ -1935,9 +2044,12 @@
            renderBMR(userProfile.age, userProfile.weight, userProfile.heightFt, userProfile.heightIn);
          }
 
-         // Load workout charts with saved data
-         loadTreadmillChart();
-         loadStairsChart();
+         // Load water level charts with saved data
+         loadWaterLevelChart();
+         
+         // Load meter reads chart
+         loadMeterReadsChart();
+         loadWaterLevelHistoryChart();
 
          // Update food menu with custom foods
          updateFoodMenu();
@@ -1961,14 +2073,18 @@
          // Convert Set to Array for Firebase storage
          const streakDataForStorage = {
            ...streakData,
-           workoutDates: Array.from(streakData.workoutDates)
+           workoutDates: Array.from(streakData.workoutDates || []),
+           waterLevelDates: Array.from(streakData.waterLevelDates || [])
          };
          
          await db.collection('users').doc(currentUser.uid).collection('progress').doc('data').set({
            basalByDate,
            activityByDate,
            weightByDate,
-           workoutDataByDate,
+           waterLevelDataByDate,
+           customLocations,
+           meterReadsDataByDate,
+           customMeterReadsLocations,
            foodDataByDate,
            customFoods,
            weightLoggingClosed,
@@ -1982,49 +2098,79 @@
      }
 
          // ===== Helper Functions =====
-     function todayStr(){return new Date().toISOString().split('T')[0];}
+     function todayStr(){
+       const now = new Date();
+       const year = now.getFullYear();
+       const month = String(now.getMonth() + 1).padStart(2, '0');
+       const day = String(now.getDate()).padStart(2, '0');
+       return `${year}-${month}-${day}`;
+     }
+
+     function getLocationColor(index, alpha = 1) {
+       const colors = [
+         '#3b82f6', // blue
+         '#10b981', // emerald
+         '#f59e0b', // amber
+         '#ef4444', // red
+         '#8b5cf6', // violet
+         '#06b6d4', // cyan
+         '#84cc16', // lime
+         '#f97316', // orange
+         '#ec4899', // pink
+         '#6b7280'  // gray
+       ];
+       
+       const color = colors[index % colors.length];
+       if (alpha < 1) {
+         // Convert hex to rgba
+         const r = parseInt(color.slice(1, 3), 16);
+         const g = parseInt(color.slice(3, 5), 16);
+         const b = parseInt(color.slice(5, 7), 16);
+         return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+       }
+       return color;
+     }
      
      // ===== Streak Functions =====
     function calculateStreaks() {
       const today = todayStr();
-      console.log('calculateStreaks called, workoutDataByDate:', workoutDataByDate);
+      console.log('calculateStreaks called, waterLevelDataByDate:', waterLevelDataByDate);
       
-      const workoutDates = Object.keys(workoutDataByDate).filter(date => {
-        const day = workoutDataByDate[date];
-        const hasTreadmill = day.treadmill && day.treadmill.calories > 0;
-        const hasStairs = day.stairs && day.stairs.calories > 0;
-        console.log(`Date ${date}: treadmill=${hasTreadmill}, stairs=${hasStairs}`);
-        return hasTreadmill || hasStairs;
+      const waterLevelDates = Object.keys(waterLevelDataByDate).filter(date => {
+        const day = waterLevelDataByDate[date];
+        const hasWaterLevel = day && Object.keys(day).length > 0;
+        console.log(`Date ${date}: hasWaterLevel=${hasWaterLevel}`);
+        return hasWaterLevel;
       }).sort();
       
-      console.log('Filtered workout dates:', workoutDates);
+      console.log('Filtered water level dates:', waterLevelDates);
       
-      if (workoutDates.length === 0) {
+      if (waterLevelDates.length === 0) {
         streakData.currentStreak = 0;
         streakData.bestStreak = 0;
-        streakData.totalWorkouts = 0;
+        streakData.totalWaterLevels = 0;
         streakData.averageStreak = 0;
-        streakData.lastWorkoutDate = null;
-        streakData.workoutDates = new Set();
+        streakData.lastWaterLevelDate = null;
+        streakData.waterLevelDates = new Set();
         streakData.completedStreaks = [];
         return;
       }
       
-      // Calculate total workouts
-      streakData.totalWorkouts = workoutDates.length;
-      streakData.lastWorkoutDate = workoutDates[workoutDates.length - 1];
-      streakData.workoutDates = new Set(workoutDates);
+      // Calculate total water level entries
+      streakData.totalWaterLevels = waterLevelDates.length;
+      streakData.lastWaterLevelDate = waterLevelDates[waterLevelDates.length - 1];
+      streakData.waterLevelDates = new Set(waterLevelDates);
       
       // Calculate all individual streaks
       const allStreaks = [];
       let tempStreak = 0;
       
-      for (let i = 0; i < workoutDates.length; i++) {
+      for (let i = 0; i < waterLevelDates.length; i++) {
         if (i === 0) {
           tempStreak = 1;
         } else {
-          const prevDate = new Date(workoutDates[i - 1]);
-          const currDate = new Date(workoutDates[i]);
+          const prevDate = new Date(waterLevelDates[i - 1]);
+          const currDate = new Date(waterLevelDates[i]);
           const diffDays = Math.round((currDate - prevDate) / (1000 * 60 * 60 * 24));
           
           if (diffDays === 1) {
@@ -2048,15 +2194,15 @@
       let currentStreak = 0;
       let currentDate = new Date(today);
       
-      // Check if user worked out today
-      if (workoutDates.includes(today)) {
+      // Check if user logged water level today
+      if (waterLevelDates.includes(today)) {
         currentStreak = 1;
         currentDate.setDate(currentDate.getDate() - 1);
         
         // Count backwards to find consecutive days
         while (true) {
           const checkDate = currentDate.toISOString().split('T')[0];
-          if (workoutDates.includes(checkDate)) {
+          if (waterLevelDates.includes(checkDate)) {
             currentStreak++;
             currentDate.setDate(currentDate.getDate() - 1);
           } else {
@@ -2069,14 +2215,14 @@
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayStr = yesterday.toISOString().split('T')[0];
         
-        if (workoutDates.includes(yesterdayStr)) {
+        if (waterLevelDates.includes(yesterdayStr)) {
           // Count backwards from yesterday
           currentStreak = 1;
           currentDate.setDate(currentDate.getDate() - 2);
           
           while (true) {
             const checkDate = currentDate.toISOString().split('T')[0];
-            if (workoutDates.includes(checkDate)) {
+            if (waterLevelDates.includes(checkDate)) {
               currentStreak++;
               currentDate.setDate(currentDate.getDate() - 1);
             } else {
@@ -2230,7 +2376,7 @@
            checkDate.setDate(weekStart.getDate() + i);
            const checkDateStr = checkDate.toISOString().split('T')[0];
            
-           if (streakData.workoutDates.has(checkDateStr)) {
+           if (streakData.waterLevelDates.has(checkDateStr)) {
              weekWorkouts++;
            }
          }
@@ -2294,29 +2440,30 @@
        resetMobileContainer();
      }
 
-     function showMobileWorkoutMenu() {
-       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
-       mobileWorkoutModal.classList.remove('hidden');
-       mobileWorkoutModal.style.zIndex = '2000';
+     function showMobileWaterLevelMenu() {
+       const mobileWaterLevelMenuModal = document.getElementById('mobileWaterLevelMenuModal');
+       mobileWaterLevelMenuModal.classList.remove('hidden');
+       mobileWaterLevelMenuModal.style.zIndex = '2000';
      }
 
-     function hideMobileWorkoutMenu() {
-       const mobileWorkoutModal = document.getElementById('mobileWorkoutModal');
-       mobileWorkoutModal.classList.add('hidden');
+     function hideMobileWaterLevelMenu() {
+       const mobileWaterLevelMenuModal = document.getElementById('mobileWaterLevelMenuModal');
+       mobileWaterLevelMenuModal.classList.add('hidden');
        // Reset mobile container to prevent "pushed up" state
        resetMobileContainer();
      }
 
-     function showMobileTreadmillModal() {
-       const mobileTreadmillModal = document.getElementById('mobileTreadmillModal');
-       mobileTreadmillModal.classList.remove('hidden');
-       mobileTreadmillModal.style.zIndex = '2000';
+     function showMobileWaterLevelModal() {
+       const mobileWaterLevelModal = document.getElementById('mobileWaterLevelModal');
+       mobileWaterLevelModal.classList.remove('hidden');
+       mobileWaterLevelModal.style.zIndex = '2000';
        
        // Set default values
-       document.getElementById('mobileTspeed').value = 3.5;
-       document.getElementById('mobileTgrade').value = 7.5;
-       document.getElementById('mobileTdur').value = 30;
-       previewMobileTreadmill();
+       document.getElementById('mobileWaterLocation').value = '';
+       document.getElementById('mobileCustomLocationName').value = '';
+       document.getElementById('mobileWaterLevel').value = '';
+       document.getElementById('mobileWaterDate').value = todayStr();
+       previewMobileWaterLevel();
      }
 
      function hideMobileTreadmillModal() {
@@ -2326,21 +2473,1394 @@
        resetMobileContainer();
      }
 
-     function showMobileStairsModal() {
-       const mobileStairsModal = document.getElementById('mobileStairsModal');
-       mobileStairsModal.classList.remove('hidden');
-       mobileStairsModal.style.zIndex = '2000';
+     function showMobileWaterHistoryModal() {
+       const mobileWaterHistoryModal = document.getElementById('mobileWaterHistoryModal');
+       mobileWaterHistoryModal.classList.remove('hidden');
+       mobileWaterHistoryModal.style.zIndex = '2000';
        
-       // Set default values
-       document.getElementById('mobileSdur').value = 20;
-       document.getElementById('mobileSintensity').value = '8.8';
+       // Load water level history data
+       loadMobileWaterLevelHistory();
      }
 
-     function hideMobileStairsModal() {
-       const mobileStairsModal = document.getElementById('mobileStairsModal');
-       mobileStairsModal.classList.add('hidden');
+     function hideMobileWaterLevelModal() {
+       const mobileWaterLevelModal = document.getElementById('mobileWaterLevelModal');
+       mobileWaterLevelModal.classList.add('hidden');
        // Reset mobile container to prevent "pushed up" state
        resetMobileContainer();
+     }
+
+     function hideMobileWaterHistoryModal() {
+       const mobileWaterHistoryModal = document.getElementById('mobileWaterHistoryModal');
+       mobileWaterHistoryModal.classList.add('hidden');
+       // Reset mobile container to prevent "pushed up" state
+       resetMobileContainer();
+     }
+
+     function previewMobileWaterLevel() {
+       const location = document.getElementById('mobileWaterLocation').value;
+       const customLocation = document.getElementById('mobileCustomLocationName').value;
+       const level = document.getElementById('mobileWaterLevel').value;
+       const date = document.getElementById('mobileWaterDate').value;
+       
+       if (location && level > 0 && date) {
+         const locationName = location === 'custom' ? customLocation : location;
+         document.getElementById('mobileWaterResult').innerHTML = `<div class='math'>Preview: ${locationName} - ${level} ft on ${date}</div>`;
+       } else {
+         document.getElementById('mobileWaterResult').innerHTML = '';
+       }
+     }
+
+     function loadMobileWaterLevelHistory() {
+       const resultDiv = document.getElementById('mobileWaterHistoryResult');
+       const locationFilter = document.getElementById('mobileHistoryLocation').value;
+       const dateRangeFilter = document.getElementById('mobileHistoryDateRange').value;
+       
+       let dates = Object.keys(waterLevelDataByDate).sort();
+       
+       // Apply date range filter
+       if (dateRangeFilter !== 'all') {
+         const days = parseInt(dateRangeFilter);
+         const cutoffDate = new Date();
+         cutoffDate.setDate(cutoffDate.getDate() - days);
+         const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+         dates = dates.filter(date => date >= cutoffDateStr);
+       }
+       
+       // Apply location filter
+       let filteredData = [];
+       dates.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].level) {
+             // Check location filter
+             if (!locationFilter || location === locationFilter) {
+               filteredData.push({
+                 date,
+                 location,
+                 data: dayData[location]
+               });
+             }
+           }
+         });
+       });
+       
+       if (filteredData.length === 0) {
+         const noDataMessage = locationFilter || dateRangeFilter !== 'all' 
+           ? 'No data found for the selected filters'
+           : 'No water level data recorded yet';
+         resultDiv.innerHTML = `
+           <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+             <div style="font-size: 48px; margin-bottom: 16px;">💧</div>
+             <h3 style="color: #f9fafb; margin-bottom: 8px; font-size: 18px;">${noDataMessage}</h3>
+             <p style="color: #9ca3af; font-size: 14px;">${locationFilter || dateRangeFilter !== 'all' ? 'Try adjusting your filters' : 'Start logging water levels to see your history here'}</p>
+           </div>
+         `;
+         return;
+       }
+       
+       let historyHTML = `
+         <div style="margin-bottom: 20px;">
+           <h4 style="margin: 0 0 16px 0; color: #f3f4f6; font-size: 18px; font-weight: 600;">Recent Water Level Entries</h4>
+           <div style="display: flex; flex-direction: column; gap: 12px;">
+       `;
+       
+       // Show entries in reverse chronological order (most recent first)
+       filteredData.reverse().forEach(entry => {
+         const formattedDate = new Date(entry.date).toLocaleDateString('en-US', { 
+           month: 'short', 
+           day: 'numeric', 
+           year: 'numeric' 
+         });
+         
+         historyHTML += `
+           <div style="
+             background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+             border: 1px solid #4b5563;
+             border-radius: 12px;
+             padding: 16px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             transition: all 0.2s ease;
+             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+           " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.1)'">
+             <div style="display: flex; flex-direction: column; gap: 4px;">
+               <div style="font-weight: 600; color: #f3f4f6; font-size: 16px;">${entry.data.locationName}</div>
+               <div style="color: #9ca3af; font-size: 14px;">${formattedDate}</div>
+             </div>
+             <div style="
+               background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+               color: white;
+               padding: 8px 16px;
+               border-radius: 20px;
+               font-weight: 600;
+               font-size: 14px;
+               min-width: 80px;
+               text-align: center;
+             ">${entry.data.level} ft</div>
+           </div>
+         `;
+       });
+       
+       historyHTML += `
+           </div>
+         </div>
+       `;
+       
+       resultDiv.innerHTML = historyHTML;
+     }
+
+     // ===== Excel Export Function =====
+     function exportWaterLevelDataToExcel() {
+       const dates = Object.keys(waterLevelDataByDate).sort();
+       const allData = [];
+       
+       // Add header row
+       allData.push(['Date', 'Location', 'Water Level (ft)', 'Timestamp']);
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].level) {
+             allData.push([
+               date,
+               dayData[location].locationName,
+               dayData[location].level,
+               dayData[location].timestamp || ''
+             ]);
+           }
+         });
+       });
+       
+       // Convert to CSV format
+       const csvContent = allData.map(row => 
+         row.map(cell => `"${cell}"`).join(',')
+       ).join('\n');
+       
+       // Create and download file
+       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+       const link = document.createElement('a');
+       const url = URL.createObjectURL(blob);
+       link.setAttribute('href', url);
+       link.setAttribute('download', `water_level_data_${todayStr()}.csv`);
+       link.style.visibility = 'hidden';
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+     }
+
+     // ===== Custom Locations Management =====
+     function showLocationsModal() {
+       console.log('showLocationsModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('locationsModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'locationsModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <h3 style="margin: 0 0 16px 0; color: #f3f4f6; font-size: 18px;">Manage Water Level Locations</h3>
+         <p style="margin: 0 0 20px 0; color: #9ca3af; font-size: 14px;">Add or remove custom locations for water level tracking</p>
+         
+         <div style="margin-bottom: 24px;">
+           <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Add New Location</h4>
+           <input id="newLocationName" type="text" placeholder="Enter location name (e.g., Lake Tahoe)" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+             margin-bottom: 12px;
+             box-sizing: border-box;
+           " />
+           <button id="addLocationBtn" class="primary" style="width: 100%;"> Add Location</button>
+         </div>
+         
+         <div>
+           <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Your Locations</h4>
+           <div id="locationsList" style="max-height: 200px; overflow-y: auto;">
+             <div style="text-align: center; padding: 20px; color: #9ca3af;">
+               <div style="font-size: 32px; margin-bottom: 8px;">📍</div>
+               <p style="margin: 0 0 8px 0; font-size: 14px;">No custom locations added yet</p>
+               <p style="margin: 0; font-size: 12px; opacity: 0.7;">Add locations above or log water data with custom locations to get started</p>
+             </div>
+           </div>
+         </div>
+         
+         <div style="margin-top: 20px; text-align: center;">
+           <button id="closeLocationsModal" class="ghost">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Add event listeners
+       document.getElementById('addLocationBtn').addEventListener('click', addLocation);
+       document.getElementById('closeLocationsModal').addEventListener('click', hideLocationsModal);
+       document.getElementById('newLocationName').addEventListener('keypress', function(e) {
+         if (e.key === 'Enter') {
+           addLocation();
+         }
+       });
+       
+       // Load locations
+       loadLocationsList();
+       
+       console.log('New modal created and should be visible');
+     }
+
+     function hideLocationsModal() {
+       const locationsModal = document.getElementById('locationsModal');
+       if (locationsModal) {
+         locationsModal.remove();
+       }
+     }
+
+     function loadLocationsList() {
+       const locationsList = document.getElementById('locationsList');
+       
+       if (customLocations.length === 0) {
+         locationsList.innerHTML = `
+           <div style="text-align: center; padding: 20px; color: #9ca3af;">
+             <div style="font-size: 32px; margin-bottom: 8px;">📍</div>
+             <p style="margin: 0; font-size: 14px;">No custom locations added yet</p>
+           </div>
+         `;
+         return;
+       }
+
+       let locationsHTML = '';
+       customLocations.forEach((location, index) => {
+         locationsHTML += `
+           <div style="
+             background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+             border: 1px solid #4b5563;
+             border-radius: 8px;
+             padding: 12px 16px;
+             margin-bottom: 8px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             transition: all 0.2s ease;
+           " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+             <span style="color: #f3f4f6; font-weight: 500;">${location}</span>
+             <div style="display: flex; gap: 8px;">
+               <button onclick="editLocation(${index})" style="
+                 background: #3b82f6;
+                 color: white;
+                 border: none;
+                 border-radius: 4px;
+                 padding: 4px 8px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                 ✏️ Edit
+               </button>
+               <button onclick="removeLocation(${index})" style="
+                 background: #dc2626;
+                 color: white;
+                 border: none;
+                 border-radius: 4px;
+                 padding: 4px 8px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                 🗑️ Delete
+               </button>
+             </div>
+           </div>
+         `;
+       });
+       
+       locationsList.innerHTML = locationsHTML;
+     }
+
+     function addLocation() {
+       const newLocationName = document.getElementById('newLocationName').value.trim();
+       
+       if (!newLocationName) {
+         alert('Please enter a location name');
+         return;
+       }
+       
+       if (customLocations.includes(newLocationName)) {
+         alert('This location already exists');
+         return;
+       }
+       
+       customLocations.push(newLocationName);
+       document.getElementById('newLocationName').value = '';
+       loadLocationsList();
+       updateLocationDropdowns();
+       saveUserData();
+     }
+
+     function editLocation(index) {
+       const newName = prompt('Enter new location name:', customLocations[index]);
+       if (newName && newName.trim() && newName.trim() !== customLocations[index]) {
+         if (customLocations.includes(newName.trim())) {
+           alert('This location already exists');
+           return;
+         }
+         customLocations[index] = newName.trim();
+         loadLocationsList();
+         updateLocationDropdowns();
+         saveUserData();
+       }
+     }
+
+     function removeLocation(index) {
+       if (confirm('Are you sure you want to delete this location?')) {
+         customLocations.splice(index, 1);
+         loadLocationsList();
+         updateLocationDropdowns();
+         saveUserData();
+       }
+     }
+
+     function updateLocationDropdowns() {
+       // Update desktop water location dropdown
+       const waterLocation = document.getElementById('waterLocation');
+       const mobileWaterLocation = document.getElementById('mobileWaterLocation');
+       
+       // Clear all options except the first one (which should be empty)
+       [waterLocation, mobileWaterLocation].forEach(dropdown => {
+         // Keep only the first option (empty/default)
+         while (dropdown.children.length > 1) {
+           dropdown.removeChild(dropdown.lastChild);
+         }
+       });
+       
+       // Add custom locations first
+       customLocations.forEach(location => {
+         const option = document.createElement('option');
+         option.value = location;
+         option.textContent = location;
+         option.setAttribute('data-custom', 'true');
+         
+         [waterLocation, mobileWaterLocation].forEach(dropdown => {
+           dropdown.appendChild(option.cloneNode(true));
+         });
+       });
+       
+       // Add "Add Custom Location" option at the end
+       const customOption = document.createElement('option');
+       customOption.value = 'custom';
+       customOption.textContent = '+ Add Custom Location';
+       customOption.setAttribute('data-custom', 'true');
+       
+       [waterLocation, mobileWaterLocation].forEach(dropdown => {
+         dropdown.appendChild(customOption.cloneNode(true));
+       });
+     }
+
+
+     // ===== Meter Reads Functions =====
+     function showMeterReadsMenu() {
+       console.log('showMeterReadsMenu called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('meterReadsMenuModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'meterReadsMenuModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <div style="display: flex; align-items: center; margin-bottom: 20px;">
+           <div style="font-size: 24px; margin-right: 12px;">📏</div>
+           <div>
+             <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Meter Reads</h3>
+             <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Track meter readings at different locations</p>
+           </div>
+         </div>
+         
+         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;">
+           <div id="openMeterReadsEntry" style="
+             background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+             border: 1px solid #4b5563;
+             border-radius: 8px;
+             padding: 16px;
+             text-align: center;
+             cursor: pointer;
+             transition: all 0.2s ease;
+           " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+             <div style="font-size: 24px; margin-bottom: 8px;">📝</div>
+             <div style="color: #f3f4f6; font-weight: 500;">Add Meter Read</div>
+           </div>
+           <div id="openMeterReadsHistory" style="
+             background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+             border: 1px solid #4b5563;
+             border-radius: 8px;
+             padding: 16px;
+             text-align: center;
+             cursor: pointer;
+             transition: all 0.2s ease;
+           " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+             <div style="font-size: 24px; margin-bottom: 8px;">📊</div>
+             <div style="color: #f3f4f6; font-weight: 500;">View History</div>
+           </div>
+         </div>
+         
+         <div style="text-align: center;">
+           <button id="closeMeterReadsMenu" class="ghost">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Add event listeners
+       document.getElementById('openMeterReadsEntry').addEventListener('click', showMeterReadsModal);
+       document.getElementById('openMeterReadsHistory').addEventListener('click', showMeterReadsHistoryModal);
+       document.getElementById('closeMeterReadsMenu').addEventListener('click', hideMeterReadsMenu);
+       
+       console.log('New meter reads menu modal created and should be visible');
+     }
+
+     function hideMeterReadsMenu() {
+       const meterReadsMenuModal = document.getElementById('meterReadsMenuModal');
+       if (meterReadsMenuModal) {
+         meterReadsMenuModal.remove();
+       }
+     }
+
+     function showMeterReadsModal() {
+       console.log('showMeterReadsModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('meterReadsModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'meterReadsModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <div style="display: flex; align-items: center; margin-bottom: 20px;">
+           <div style="font-size: 24px; margin-right: 12px;">📝</div>
+           <div>
+             <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Add Meter Read</h3>
+             <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">Record a new meter reading</p>
+           </div>
+         </div>
+         
+         <div style="margin-bottom: 16px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Location</label>
+           <select id="meterReadsLocation" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+             margin-bottom: 12px;
+           ">
+             <option value="">Select Location</option>
+             <option value="custom">Custom Location</option>
+           </select>
+         </div>
+         
+         <div id="customMeterReadsLocationField" style="display: none; margin-bottom: 16px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Custom Location Name</label>
+           <input id="customMeterReadsLocationName" type="text" placeholder="Enter location name" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+           " />
+         </div>
+         
+         <div style="margin-bottom: 16px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Meter Read (ft)</label>
+           <input id="meterReadsValue" type="number" step="0.01" placeholder="0.00" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+           " />
+         </div>
+         
+         <div style="margin-bottom: 16px;">
+           <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Date</label>
+           <input id="meterReadsDate" type="date" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+           " />
+         </div>
+         
+         <button id="manageMeterReadsLocations" class="ghost" style="
+           width: 100%;
+           margin-bottom: 16px;
+           padding: 10px 12px;
+           background: #374151;
+           border: 1px solid #4b5563;
+           border-radius: 6px;
+           color: #f9fafb;
+           font-size: 14px;
+           cursor: pointer;
+         ">📍 Add Locations</button>
+         
+         <div id="meterReadsResult" style="margin-bottom: 16px;"></div>
+         
+         <div style="display: flex; flex-direction: column; gap: 12px;">
+           <button id="meterReadsCalc" class="primary" style="width: 100%;">Log Meter Read</button>
+           <button id="closeMeterReads" class="ghost" style="width: 100%;">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Set default values
+       document.getElementById('meterReadsLocation').value = '';
+       document.getElementById('customMeterReadsLocationName').value = '';
+       document.getElementById('meterReadsValue').value = '';
+       document.getElementById('meterReadsDate').value = todayStr();
+       
+       // Populate location dropdown with custom locations
+       const locationDropdown = document.getElementById('meterReadsLocation');
+       customMeterReadsLocations.forEach(location => {
+         const option = document.createElement('option');
+         option.value = location;
+         option.textContent = location;
+         option.setAttribute('data-custom', 'true');
+         locationDropdown.appendChild(option);
+       });
+       
+       previewMeterReads();
+       
+       // Add event listeners
+       document.getElementById('closeMeterReads').addEventListener('click', hideMeterReadsModal);
+       document.getElementById('manageMeterReadsLocations').addEventListener('click', showMeterReadsLocationsModal);
+       document.getElementById('meterReadsCalc').addEventListener('click', function() {
+         const { location, customLocation, value, date } = meterReadsInputs();
+         if (!location || !value || !date) {
+           document.getElementById('meterReadsResult').innerHTML = '<p style="color: #ef4444;">Please enter all values</p>';
+           return;
+         }
+         if (location === 'custom' && !customLocation) {
+           document.getElementById('meterReadsResult').innerHTML = '<p style="color: #ef4444;">Please enter custom location name</p>';
+           return;
+         }
+         renderMeterReads(location, customLocation, value, date);
+       });
+       
+       // Input change listeners
+       document.getElementById('meterReadsLocation').addEventListener('change', function() {
+         const customField = document.getElementById('customMeterReadsLocationField');
+         if (this.value === 'custom') {
+           customField.style.display = 'block';
+         } else {
+           customField.style.display = 'none';
+         }
+         previewMeterReads();
+       });
+       document.getElementById('meterReadsValue').addEventListener('input', previewMeterReads);
+       document.getElementById('meterReadsDate').addEventListener('change', previewMeterReads);
+       document.getElementById('customMeterReadsLocationName').addEventListener('input', previewMeterReads);
+       
+       console.log('New meter reads entry modal created and should be visible');
+     }
+
+     function hideMeterReadsModal() {
+       const meterReadsModal = document.getElementById('meterReadsModal');
+       if (meterReadsModal) {
+         meterReadsModal.remove();
+       }
+     }
+
+     function showMeterReadsHistoryModal() {
+       console.log('showMeterReadsHistoryModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('meterReadsHistoryModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'meterReadsHistoryModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <div style="display: flex; align-items: center; margin-bottom: 20px;">
+           <div style="font-size: 24px; margin-right: 12px;">📊</div>
+           <div>
+             <h3 style="margin: 0; color: #f3f4f6; font-size: 18px;">Meter Reads History</h3>
+             <p style="margin: 4px 0 0 0; color: #9ca3af; font-size: 14px;">View recorded meter reading data</p>
+           </div>
+         </div>
+         
+         <div style="margin-bottom: 20px;">
+           <div style="margin-bottom: 12px;">
+             <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Filter by Location</label>
+             <select id="meterReadsHistoryLocation" style="
+               width: 100%;
+               padding: 8px 12px;
+               background: #374151;
+               border: 1px solid #4b5563;
+               border-radius: 6px;
+               color: #f9fafb;
+               font-size: 14px;
+             ">
+               <option value="">All Locations</option>
+             </select>
+           </div>
+           <div>
+             <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 4px;">Date Range</label>
+             <select id="meterReadsHistoryDateRange" style="
+               width: 100%;
+               padding: 8px 12px;
+               background: #374151;
+               border: 1px solid #4b5563;
+               border-radius: 6px;
+               color: #f9fafb;
+               font-size: 14px;
+             ">
+               <option value="7">Last 7 days</option>
+               <option value="30" selected>Last 30 days</option>
+               <option value="90">Last 90 days</option>
+               <option value="365">Last year</option>
+               <option value="all">All time</option>
+             </select>
+           </div>
+         </div>
+         
+         <div id="meterReadsHistoryResult" style="margin-bottom: 20px;"></div>
+         
+         <div style="display: flex; flex-direction: column; gap: 12px;">
+           <button id="exportMeterReadsHistoryBtn" style="
+             background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+             border: none;
+             color: white;
+             padding: 12px 24px;
+             border-radius: 8px;
+             font-weight: 600;
+             cursor: pointer;
+             transition: all 0.2s ease;
+           " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(16, 185, 129, 0.3)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">📊 Export to Excel</button>
+           <button id="closeMeterReadsHistory" class="ghost" style="width: 100%;">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Populate location dropdown with custom locations
+       const locationDropdown = document.getElementById('meterReadsHistoryLocation');
+       customMeterReadsLocations.forEach(location => {
+         const option = document.createElement('option');
+         option.value = location;
+         option.textContent = location;
+         option.setAttribute('data-custom', 'true');
+         locationDropdown.appendChild(option);
+       });
+       
+       // Add event listeners
+       document.getElementById('closeMeterReadsHistory').addEventListener('click', hideMeterReadsHistoryModal);
+       document.getElementById('exportMeterReadsHistoryBtn').addEventListener('click', exportMeterReadsDataToExcel);
+       document.getElementById('meterReadsHistoryLocation').addEventListener('change', loadMeterReadsHistory);
+       document.getElementById('meterReadsHistoryDateRange').addEventListener('change', loadMeterReadsHistory);
+       
+       // Load meter reads history data
+       loadMeterReadsHistory();
+       
+       console.log('New meter reads history modal created and should be visible');
+     }
+
+     function hideMeterReadsHistoryModal() {
+       const meterReadsHistoryModal = document.getElementById('meterReadsHistoryModal');
+       if (meterReadsHistoryModal) {
+         meterReadsHistoryModal.remove();
+       }
+     }
+
+     function meterReadsInputs() {
+       const location = document.getElementById('meterReadsLocation').value;
+       const customLocation = document.getElementById('customMeterReadsLocationName').value;
+       const value = document.getElementById('meterReadsValue').value;
+       const date = document.getElementById('meterReadsDate').value;
+       return { location, customLocation, value, date };
+     }
+
+     function previewMeterReads() {
+       const { location, customLocation, value, date } = meterReadsInputs();
+       
+       if (location && value > 0 && date) {
+         const locationName = location === 'custom' ? customLocation : location;
+         document.getElementById('meterReadsResult').innerHTML = `<div class='math'>Preview: ${locationName} - ${value} ft on ${date}</div>`;
+       } else {
+         document.getElementById('meterReadsResult').innerHTML = '';
+       }
+     }
+
+     function renderMeterReads(location, customLocation, value, date) {
+       const locationName = location === 'custom' ? customLocation : location;
+       document.getElementById('meterReadsResult').innerHTML = `<div class='math'>Logged: ${locationName} - ${value} ft on ${date}</div>`;
+       
+       // If it's a custom location, add it to the custom locations list
+       if (location === 'custom' && customLocation && !customMeterReadsLocations.includes(customLocation)) {
+         customMeterReadsLocations.push(customLocation);
+         updateMeterReadsLocationDropdowns();
+       }
+       
+       // Save meter reads data to Firebase
+       if (!meterReadsDataByDate[date]) {
+         meterReadsDataByDate[date] = {};
+       }
+       
+       // Store meter reads data by location
+       meterReadsDataByDate[date][location] = {
+         value: value,
+         locationName: locationName,
+         timestamp: new Date().toISOString()
+       };
+       
+       saveUserData();
+       
+       // Update meter reads chart
+       loadMeterReadsChart();
+       
+       // Update overall meter reads chart
+       updateMeterReadsCharts();
+       
+       // Update streaks
+       calculateStreaks();
+       updateStreakDisplay();
+     }
+
+     function loadMeterReadsChart() {
+       updateMeterReadsCharts();
+     }
+
+     function updateMeterReadsCharts() {
+       const dates = Object.keys(meterReadsDataByDate).sort();
+       const twoMonthsAgo = new Date();
+       twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+       const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
+       
+       const filteredDates = dates.filter(date => date >= twoMonthsAgoStr);
+       const filteredLabels = filteredDates.map(date => {
+         const d = new Date(date);
+         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+       });
+       
+       // Group data by location
+       const locationData = {};
+       filteredDates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].value) {
+             if (!locationData[location]) {
+               locationData[location] = {
+                 label: dayData[location].locationName,
+                 data: [],
+                 borderColor: getLocationColor(Object.keys(locationData).length),
+                 backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
+                 tension: 0.1
+               };
+             }
+             locationData[location].data.push(dayData[location].value);
+           }
+         });
+       });
+       
+       const datasets = Object.values(locationData);
+       
+       // Update desktop chart
+       if (typeof meterReadsChart !== 'undefined') {
+         meterReadsChart.data.labels = filteredLabels;
+         meterReadsChart.data.datasets = datasets;
+         meterReadsChart.update();
+       }
+       
+       // Update mobile chart
+       if (typeof mobileMeterReadsChart !== 'undefined') {
+         mobileMeterReadsChart.data.labels = filteredLabels;
+         mobileMeterReadsChart.data.datasets = datasets;
+         mobileMeterReadsChart.update();
+       }
+     }
+
+     function updateMeterReadsChartsFullYear() {
+       const dates = Object.keys(meterReadsDataByDate).sort();
+       const filteredLabels = dates.map(date => {
+         const d = new Date(date);
+         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+       });
+       
+       // Group data by location
+       const locationData = {};
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].value) {
+             if (!locationData[location]) {
+               locationData[location] = {
+                 label: dayData[location].locationName,
+                 data: [],
+                 borderColor: getLocationColor(Object.keys(locationData).length),
+                 backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
+                 tension: 0.1
+               };
+             }
+             locationData[location].data.push(dayData[location].value);
+           }
+         });
+       });
+       
+       const datasets = Object.values(locationData);
+       
+       // Update desktop chart
+       if (typeof meterReadsChart !== 'undefined') {
+         meterReadsChart.data.labels = filteredLabels;
+         meterReadsChart.data.datasets = datasets;
+         meterReadsChart.update();
+       }
+       
+       // Update mobile chart
+       if (typeof mobileMeterReadsChart !== 'undefined') {
+         mobileMeterReadsChart.data.labels = filteredLabels;
+         mobileMeterReadsChart.data.datasets = datasets;
+         mobileMeterReadsChart.update();
+       }
+     }
+
+     function loadMeterReadsHistory() {
+       const resultDiv = document.getElementById('meterReadsHistoryResult');
+       const locationFilter = document.getElementById('meterReadsHistoryLocation').value;
+       const dateRangeFilter = document.getElementById('meterReadsHistoryDateRange').value;
+       
+       let dates = Object.keys(meterReadsDataByDate).sort();
+       
+       // Apply date range filter
+       if (dateRangeFilter !== 'all') {
+         const days = parseInt(dateRangeFilter);
+         const cutoffDate = new Date();
+         cutoffDate.setDate(cutoffDate.getDate() - days);
+         const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+         dates = dates.filter(date => date >= cutoffDateStr);
+       }
+       
+       // Apply location filter
+       let filteredData = [];
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].value) {
+             // Check location filter
+             if (!locationFilter || location === locationFilter) {
+               filteredData.push({
+                 date,
+                 location,
+                 data: dayData[location]
+               });
+             }
+           }
+         });
+       });
+       
+       if (filteredData.length === 0) {
+         const noDataMessage = locationFilter || dateRangeFilter !== 'all' 
+           ? 'No data found for the selected filters'
+           : 'No meter reads data recorded yet';
+         resultDiv.innerHTML = `
+           <div style="text-align: center; padding: 40px 20px; color: #9ca3af;">
+             <div style="font-size: 48px; margin-bottom: 16px;">📏</div>
+             <h3 style="color: #f9fafb; margin-bottom: 8px; font-size: 18px;">${noDataMessage}</h3>
+             <p style="color: #9ca3af; font-size: 14px;">${locationFilter || dateRangeFilter !== 'all' ? 'Try adjusting your filters' : 'Start logging meter reads to see your history here'}</p>
+           </div>
+         `;
+         return;
+       }
+       
+       let historyHTML = `
+         <div style="margin-bottom: 20px;">
+           <h4 style="margin: 0 0 16px 0; color: #f3f4f6; font-size: 18px; font-weight: 600;">Recent Meter Reads Entries</h4>
+           <div style="display: flex; flex-direction: column; gap: 12px;">
+       `;
+       
+       // Show entries in reverse chronological order (most recent first)
+       filteredData.reverse().forEach(entry => {
+         const formattedDate = new Date(entry.date).toLocaleDateString('en-US', { 
+           month: 'short', 
+           day: 'numeric', 
+           year: 'numeric' 
+         });
+         
+         historyHTML += `
+           <div style="
+             background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+             border: 1px solid #4b5563;
+             border-radius: 12px;
+             padding: 16px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             transition: all 0.2s ease;
+             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+           " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.1)'">
+             <div style="display: flex; flex-direction: column; gap: 4px;">
+               <div style="font-weight: 600; color: #f3f4f6; font-size: 16px;">${entry.data.locationName}</div>
+               <div style="color: #9ca3af; font-size: 14px;">${formattedDate}</div>
+             </div>
+             <div style="
+               background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+               color: white;
+               padding: 8px 16px;
+               border-radius: 20px;
+               font-weight: 600;
+               font-size: 14px;
+               min-width: 80px;
+               text-align: center;
+             ">${entry.data.value} ft</div>
+           </div>
+         `;
+       });
+       
+       historyHTML += `
+           </div>
+         </div>
+       `;
+       
+       resultDiv.innerHTML = historyHTML;
+     }
+
+     function exportMeterReadsDataToExcel() {
+       const dates = Object.keys(meterReadsDataByDate).sort();
+       const allData = [];
+       
+       // Add header row
+       allData.push(['Date', 'Location', 'Meter Read (ft)', 'Timestamp']);
+       
+       // Add data rows
+       dates.forEach(date => {
+         const dayData = meterReadsDataByDate[date];
+         Object.keys(dayData).forEach(location => {
+           if (dayData[location] && dayData[location].value) {
+             allData.push([
+               date,
+               dayData[location].locationName,
+               dayData[location].value,
+               dayData[location].timestamp || ''
+             ]);
+           }
+         });
+       });
+       
+       // Convert to CSV format
+       const csvContent = allData.map(row => 
+         row.map(cell => `"${cell}"`).join(',')
+       ).join('\n');
+       
+       // Create and download file
+       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+       const link = document.createElement('a');
+       const url = URL.createObjectURL(blob);
+       link.setAttribute('href', url);
+       link.setAttribute('download', `meter_reads_data_${todayStr()}.csv`);
+       link.style.visibility = 'hidden';
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+     }
+
+     // ===== Meter Reads Locations Management =====
+     function showMeterReadsLocationsModal() {
+       console.log('showMeterReadsLocationsModal called');
+       
+       // Create a completely new, simple modal that we know will work
+       const existingModal = document.getElementById('meterReadsLocationsModal');
+       if (existingModal) {
+         existingModal.remove();
+       }
+       
+       // Create new modal
+       const newModal = document.createElement('div');
+       newModal.id = 'meterReadsLocationsModal';
+       newModal.style.cssText = `
+         position: fixed;
+         top: 0;
+         left: 0;
+         width: 100vw;
+         height: 100vh;
+         background-color: rgba(0, 0, 0, 0.8);
+         z-index: 99999;
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         padding: 20px;
+         box-sizing: border-box;
+       `;
+       
+       // Create modal content
+       const modalContent = document.createElement('div');
+       modalContent.style.cssText = `
+         background-color: #1f2937;
+         border-radius: 12px;
+         padding: 20px;
+         max-width: 90%;
+         max-height: 90vh;
+         overflow-y: auto;
+         color: white;
+         width: 100%;
+         box-sizing: border-box;
+       `;
+       
+       // Add content
+       modalContent.innerHTML = `
+         <h3 style="margin: 0 0 16px 0; color: #f3f4f6; font-size: 18px;">Manage Meter Reads Locations</h3>
+         <p style="margin: 0 0 20px 0; color: #9ca3af; font-size: 14px;">Add or remove custom locations for meter reading tracking</p>
+         
+         <div style="margin-bottom: 24px;">
+           <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Add New Location</h4>
+           <input id="newMeterReadsLocationName" type="text" placeholder="Enter location name (e.g., Building A)" style="
+             width: 100%;
+             padding: 10px 12px;
+             background: #374151;
+             border: 1px solid #4b5563;
+             border-radius: 6px;
+             color: #f9fafb;
+             font-size: 14px;
+             margin-bottom: 12px;
+             box-sizing: border-box;
+           " />
+           <button id="addMeterReadsLocationBtn" class="primary" style="width: 100%;">➕ Add Location</button>
+         </div>
+         
+         <div>
+           <h4 style="color: #f3f4f6; margin-bottom: 12px; font-size: 16px;">Your Locations</h4>
+           <div id="meterReadsLocationsList" style="max-height: 200px; overflow-y: auto;">
+             <div style="text-align: center; padding: 20px; color: #9ca3af;">
+               <div style="font-size: 32px; margin-bottom: 8px;">📍</div>
+               <p style="margin: 0 0 8px 0; font-size: 14px;">No custom locations added yet</p>
+               <p style="margin: 0; font-size: 12px; opacity: 0.7;">Add locations above or log meter data with custom locations to get started</p>
+             </div>
+           </div>
+         </div>
+         
+         <div style="margin-top: 20px; text-align: center;">
+           <button id="closeMeterReadsLocationsModal" class="ghost">Close</button>
+         </div>
+       `;
+       
+       newModal.appendChild(modalContent);
+       document.body.appendChild(newModal);
+       
+       // Add event listeners
+       document.getElementById('addMeterReadsLocationBtn').addEventListener('click', addMeterReadsLocation);
+       document.getElementById('closeMeterReadsLocationsModal').addEventListener('click', hideMeterReadsLocationsModal);
+       document.getElementById('newMeterReadsLocationName').addEventListener('keypress', function(e) {
+         if (e.key === 'Enter') {
+           addMeterReadsLocation();
+         }
+       });
+       
+       // Load locations
+       loadMeterReadsLocationsList();
+       
+       console.log('New meter reads locations modal created and should be visible');
+     }
+
+     function hideMeterReadsLocationsModal() {
+       const meterReadsLocationsModal = document.getElementById('meterReadsLocationsModal');
+       if (meterReadsLocationsModal) {
+         meterReadsLocationsModal.remove();
+       }
+     }
+
+     function loadMeterReadsLocationsList() {
+       const locationsList = document.getElementById('meterReadsLocationsList');
+       
+       if (customMeterReadsLocations.length === 0) {
+         locationsList.innerHTML = `
+           <div style="text-align: center; padding: 20px; color: #9ca3af;">
+             <div style="font-size: 32px; margin-bottom: 8px;">📍</div>
+             <p style="margin: 0; font-size: 14px;">No custom locations added yet</p>
+           </div>
+         `;
+         return;
+       }
+
+       let locationsHTML = '';
+       customMeterReadsLocations.forEach((location, index) => {
+         locationsHTML += `
+           <div style="
+             background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+             border: 1px solid #4b5563;
+             border-radius: 8px;
+             padding: 12px 16px;
+             margin-bottom: 8px;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             transition: all 0.2s ease;
+           " onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.2)'" 
+             onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+             <span style="color: #f3f4f6; font-weight: 500;">${location}</span>
+             <div style="display: flex; gap: 8px;">
+               <button onclick="editMeterReadsLocation(${index})" style="
+                 background: #3b82f6;
+                 color: white;
+                 border: none;
+                 border-radius: 4px;
+                 padding: 4px 8px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#2563eb'" onmouseout="this.style.background='#3b82f6'">
+                 ✏️ Edit
+               </button>
+               <button onclick="removeMeterReadsLocation(${index})" style="
+                 background: #dc2626;
+                 color: white;
+                 border: none;
+                 border-radius: 4px;
+                 padding: 4px 8px;
+                 font-size: 12px;
+                 cursor: pointer;
+                 transition: all 0.2s ease;
+               " onmouseover="this.style.background='#b91c1c'" onmouseout="this.style.background='#dc2626'">
+                 🗑️ Delete
+               </button>
+             </div>
+           </div>
+         `;
+       });
+       
+       locationsList.innerHTML = locationsHTML;
+     }
+
+     function addMeterReadsLocation() {
+       const newLocationName = document.getElementById('newMeterReadsLocationName').value.trim();
+       
+       if (!newLocationName) {
+         alert('Please enter a location name');
+         return;
+       }
+       
+       if (customMeterReadsLocations.includes(newLocationName)) {
+         alert('This location already exists');
+         return;
+       }
+       
+       customMeterReadsLocations.push(newLocationName);
+       document.getElementById('newMeterReadsLocationName').value = '';
+       loadMeterReadsLocationsList();
+       updateMeterReadsLocationDropdowns();
+       saveUserData();
+     }
+
+     function editMeterReadsLocation(index) {
+       const newName = prompt('Enter new location name:', customMeterReadsLocations[index]);
+       if (newName && newName.trim() && newName.trim() !== customMeterReadsLocations[index]) {
+         if (customMeterReadsLocations.includes(newName.trim())) {
+           alert('This location already exists');
+           return;
+         }
+         customMeterReadsLocations[index] = newName.trim();
+         loadMeterReadsLocationsList();
+         updateMeterReadsLocationDropdowns();
+         saveUserData();
+       }
+     }
+
+     function removeMeterReadsLocation(index) {
+       if (confirm('Are you sure you want to delete this location?')) {
+         customMeterReadsLocations.splice(index, 1);
+         loadMeterReadsLocationsList();
+         updateMeterReadsLocationDropdowns();
+         saveUserData();
+       }
+     }
+
+     function updateMeterReadsLocationDropdowns() {
+       // Update desktop meter reads location dropdown
+       const meterReadsLocation = document.getElementById('meterReadsLocation');
+       const meterReadsHistoryLocation = document.getElementById('meterReadsHistoryLocation');
+       
+       // Only update dropdowns that exist (meterReadsLocation is created dynamically)
+       const dropdowns = [meterReadsHistoryLocation].filter(dropdown => dropdown !== null);
+       
+       // Clear all options except the first one (which should be empty)
+       dropdowns.forEach(dropdown => {
+         // Keep only the first option (empty/default)
+         while (dropdown.children.length > 1) {
+           dropdown.removeChild(dropdown.lastChild);
+         }
+       });
+       
+       // Add custom locations first
+       customMeterReadsLocations.forEach(location => {
+         const option = document.createElement('option');
+         option.value = location;
+         option.textContent = location;
+         option.setAttribute('data-custom', 'true');
+         
+         dropdowns.forEach(dropdown => {
+           dropdown.appendChild(option.cloneNode(true));
+         });
+       });
+       
+       // Add "Add Custom Location" option at the end (only to history dropdown since entry dropdown is dynamic)
+       if (meterReadsHistoryLocation) {
+         const customOption = document.createElement('option');
+         customOption.value = 'custom';
+         customOption.textContent = '+ Add Custom Location';
+         customOption.setAttribute('data-custom', 'true');
+         meterReadsHistoryLocation.appendChild(customOption);
+       }
      }
 
      function showMobileFoodMenu() {
@@ -2438,19 +3958,7 @@
 
 
 
-     function previewMobileTreadmill() {
-       const w = userProfile?.weight || 170;
-       const s = +document.getElementById('mobileTspeed').value;
-       const g = +document.getElementById('mobileTgrade').value;
-       const m = +document.getElementById('mobileTdur').value;
-       
-       if (w > 0 && s > 0 && g >= 0 && m > 0) {
-         const total = calcTreadmillKcal(w, s, g, m);
-         document.getElementById('mobileTresult').innerHTML = `<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
-       } else {
-         document.getElementById('mobileTresult').innerHTML = '';
-       }
-     }
+    // Old previewMobileTreadmill function removed - replaced with water level functionality
 
      function addWeightForDate(weight, date) {
        weightByDate[date] = weight;
@@ -2459,35 +3967,19 @@
        updateCharts();
        saveUserData();
      }
-    function mphToMmin(mph){return mph*26.8224}
-    function calcTreadmillKcal(lbs,mph,gradePct,minutes){
-      const kg=lbs/2.2046;const speed=mphToMmin(mph);const grade=gradePct/100;
-      const vo2=0.1*speed+1.8*speed*grade+3.5;
-      const kcalPerMin=(vo2*kg)/200;return kcalPerMin*minutes;
-    }
-    function calcStairKcal(lbs, minutes, met){
-      const kg=lbs/2.2046;const kcalPerMin=(met*3.5*kg)/200;return kcalPerMin*minutes;
-    }
+    // Old calorie calculation functions removed - no longer needed for water level tracking
 
          // ===== State =====
-     let bmr=0;
-     let basalByDate={};     // date -> BMR for that date
-     let activityByDate={};  // date -> sum of activity kcal for that date
-     let weightByDate={};    // date -> weight for that date
-     let workoutDataByDate={}; // date -> workout data for that date
-     let foodDataByDate={};  // date -> food data for that date
-     let customFoods={};     // custom food name -> {name, calories, icon}
-     let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
-     let currentTheme = 'dark'; // current theme setting
+     // State variables moved to top of script for proper scope
      
      // ===== Streak Tracking =====
     let streakData = {
       currentStreak: 0,
       bestStreak: 0,
-      totalWorkouts: 0,
+        totalWaterLevels: 0,
       averageStreak: 0,
-      lastWorkoutDate: null,
-      workoutDates: new Set(),
+      lastWaterLevelDate: null,
+      waterLevelDates: new Set(),
       completedStreaks: [] // Array to store individual streak lengths
     };
 
@@ -2553,42 +4045,47 @@
        options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
      });
 
-         let weightCtx=document.getElementById('weightChart').getContext('2d');
-     let weightChart=new Chart(weightCtx,{
+         // Weight charts removed - weight module replaced with meter reads module
+     // let weightCtx=document.getElementById('weightChart').getContext('2d');
+     // let weightChart=new Chart(weightCtx,{...});
+     // let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
+     // let mobileWeightChart=new Chart(mobileWeightCtx,{...});
+
+     let waterLevelCtx=document.getElementById('waterLevelChart').getContext('2d');
+     let waterLevelChart=new Chart(waterLevelCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}
+         {label:'Water Level (ft)',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Water Level (ft)'}}}}
      });
 
-     let mobileWeightCtx=document.getElementById('mobileWeightChart').getContext('2d');
-     let mobileWeightChart=new Chart(mobileWeightCtx,{
+     let mobileWaterLevelCtx=document.getElementById('mobileWaterLevelChart').getContext('2d');
+     let mobileWaterLevelChart=new Chart(mobileWaterLevelCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Actual Weight',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9},
-         {label:'Projected Weight',data:[],borderColor:'#60a5fa',borderDash:[5,5],fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}
+         {label:'Water Level (ft)',data:[],borderColor:'#3b82f6',backgroundColor:'rgba(59,130,246,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:false}}}
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Water Level (ft)'}}}}
      });
 
-     let workoutCtx=document.getElementById('workoutChart').getContext('2d');
-     let workoutChart=new Chart(workoutCtx,{
+     // Meter Reads Charts
+     let meterReadsCtx=document.getElementById('meterReadsChart').getContext('2d');
+     let meterReadsChart=new Chart(meterReadsCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+         {label:'Meter Reads (ft)',data:[],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Meter Reads (ft)'}}}}
      });
 
-     let mobileWorkoutCtx=document.getElementById('mobileWorkoutChart').getContext('2d');
-     let mobileWorkoutChart=new Chart(mobileWorkoutCtx,{
+     let mobileMeterReadsCtx=document.getElementById('mobileMeterReadsChart').getContext('2d');
+     let mobileMeterReadsChart=new Chart(mobileMeterReadsCtx,{
        type:'line',
        data:{labels:[],datasets:[
-         {label:'Workout Calories',data:[],borderColor:'#6ee7b7',backgroundColor:'rgba(110,231,183,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
+         {label:'Meter Reads (ft)',data:[],borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.3)',fill:true,tension:0.25,pointRadius:6,pointHoverRadius:9}
        ]},
-       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Calories'}}}}
+       options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'Meter Reads (ft)'}}}}
      });
 
      // Mobile Food Chart
@@ -2606,7 +4103,7 @@
              ...Object.keys(basalByDate || {}),
              ...Object.keys(activityByDate || {}),
              ...Object.keys(foodDataByDate || {}),
-             ...Object.keys(workoutDataByDate || {})
+             ...Object.keys(waterLevelDataByDate || {})
            ]);
            return Array.from(set).sort();
          }
@@ -2626,8 +4123,8 @@
          }
 
      // ===== Mobile Swipe Navigation =====
-     let currentSlide = 0;
      const totalSlides = 4;
+     let currentSlide = 0;
      let startX = 0;
      let currentX = 0;
      let isDragging = false;
@@ -2965,7 +4462,7 @@
          }
        });
        
-       console.log('Mobile slide centering fixed');
+       //console.log('Mobile slide centering fixed');
      }
 
      // Aggressive centering fix for users with cached centering issues
@@ -3012,7 +4509,7 @@
          }
        });
        
-       console.log('Forced mobile slide centering reset completed');
+       //console.log('Forced mobile slide centering reset completed');
      }
 
     // Reinitialize mobile layout after settings changes
@@ -3177,7 +4674,7 @@
          // Ensure the container has proper positioning
          streakContainer.style.margin = '16px auto';
          
-         console.log('Streak module positioned consistently with other modules');
+         //console.log('Streak module positioned consistently with other modules');
        }
      }
      
@@ -3366,25 +4863,65 @@
            }
            mobileTotalChart.update();
 
-           // ----- Workout charts -----
-           const workoutPerDay = labels.map(d => {
-             let t = 0;
-             const w = workoutDataByDate[d];
-             // Use cumulative calories for each workout type
-             if (w?.treadmill?.calories) t += w.treadmill.calories;
-             if (w?.stairs?.calories)    t += w.stairs.calories;
-             return t;
+           // ----- Water Level charts -----
+           // Filter to last 2 months by default
+           const twoMonthsAgo = new Date();
+           twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+           const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
+           
+           const filteredLabels = labels.filter(date => date >= twoMonthsAgoStr);
+           
+           // Group by location for better visualization
+           const locationData = {};
+           const allLocations = new Set();
+           
+           filteredLabels.forEach(date => {
+             const dayData = waterLevelDataByDate[date];
+             if (dayData) {
+               Object.keys(dayData).forEach(location => {
+                 if (dayData[location] && dayData[location].level) {
+                   allLocations.add(location);
+                   if (!locationData[location]) {
+                     locationData[location] = [];
+                   }
+                   locationData[location].push({
+                     date: date,
+                     level: dayData[location].level,
+                     locationName: dayData[location].locationName
+                   });
+                 }
+               });
+             }
+           });
+           
+           // Create datasets for each location
+           const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
+           const datasets = Array.from(allLocations).map((location, index) => {
+             const locationPoints = locationData[location] || [];
+             const dataPoints = filteredLabels.map(date => {
+               const point = locationPoints.find(p => p.date === date);
+               return point ? point.level : null;
+             });
+             
+             return {
+               label: locationData[location]?.[0]?.locationName || location,
+               data: dataPoints,
+               borderColor: colors[index % colors.length],
+               backgroundColor: colors[index % colors.length] + '20',
+               fill: false,
+               tension: 0.25,
+               pointRadius: 4,
+               pointHoverRadius: 6
+             };
            });
 
-           workoutChart.data.labels = labels;
-           const isWorkoutFat = workoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-           workoutChart.data.datasets[0].data = isWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
-           workoutChart.update();
+           waterLevelChart.data.labels = filteredLabels;
+           waterLevelChart.data.datasets = datasets;
+           waterLevelChart.update();
 
-           mobileWorkoutChart.data.labels = labels;
-           const isMobileWorkoutFat = mobileWorkoutChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-           mobileWorkoutChart.data.datasets[0].data = isMobileWorkoutFat ? workoutPerDay.map(v => v/3500) : workoutPerDay;
-           mobileWorkoutChart.update();
+           mobileWaterLevelChart.data.labels = filteredLabels;
+           mobileWaterLevelChart.data.datasets = datasets;
+           mobileWaterLevelChart.update();
 
            // ----- Food chart (mobile) -----
            mobileFoodChart.data.labels = labels;
@@ -3397,244 +4934,172 @@
              const { labels: wLabels, actual: wActual, projected: wProjected } =
                computeWeightSeries(weightByDate, 3);
 
-             // desktop
-             weightChart.data.labels = wLabels;
-             const isWeightFat = weightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-             if (isWeightFat) {
-               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
-               weightChart.data.datasets[0].data = perDay;
-               weightChart.data.datasets[1].data = perDay;
-             } else {
-               weightChart.data.datasets[0].data = wActual;
-               weightChart.data.datasets[1].data = wProjected;
-             }
-             weightChart.update();
-
-             // mobile
-             mobileWeightChart.data.labels = wLabels;
-             const isMobileWeightFat = mobileWeightChart.options.scales.y.title?.text === 'Fat Loss (lbs)';
-             if (isMobileWeightFat) {
-               const perDay = wLabels.map(d => ((basalByDate[d] || 0) + (activityByDate[d] || 0)) / 3500);
-               mobileWeightChart.data.datasets[0].data = perDay;
-               mobileWeightChart.data.datasets[1].data = perDay;
-             } else {
-               mobileWeightChart.data.datasets[0].data = wActual;
-               mobileWeightChart.data.datasets[1].data = wProjected;
-             }
-             mobileWeightChart.update();
+             // Weight charts removed - weight module replaced with meter reads module
+             // weightChart.data.labels = wLabels;
+             // mobileWeightChart.data.labels = wLabels;
+             // weightChart.update();
+             // mobileWeightChart.update();
            }
          }
 
-    // ===== Treadmill =====
-    let tctx=document.getElementById('tchart').getContext('2d');
-    let tchart=new Chart(tctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
+    // ===== Water Level =====
+    let wctx=document.getElementById('waterChart').getContext('2d');
+    let wchart=new Chart(wctx,{type:'line',data:{labels:[],datasets:[{label:'Water Level (ft)',data:[],borderColor:'#3b82f6',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
 
-         function treadmillInputs(){
-       return {w:userProfile?.weight||170,s:+tspeed.value,g:+tgrade.value,m:+tdur.value};
+         function waterLevelInputs(){
+       return {location: waterLocation.value, customLocation: customLocationName.value, level: +waterLevel.value, date: waterDate.value};
      }
 
-     function saveTreadmillInputs() {
-       const inputs = treadmillInputs();
+     function saveWaterLevelInputs() {
+       const inputs = waterLevelInputs();
        const today = todayStr();
-       if (!workoutDataByDate[today]) {
-         workoutDataByDate[today] = {};
+       if (!waterLevelDataByDate[today]) {
+         waterLevelDataByDate[today] = {};
        }
-       workoutDataByDate[today].treadmill = inputs;
+       waterLevelDataByDate[today].waterLevel = inputs;
        saveUserData();
      }
 
-     function loadTreadmillInputs() {
+     function loadWaterLevelInputs() {
        const today = todayStr();
-       if (workoutDataByDate[today] && workoutDataByDate[today].treadmill) {
-         const data = workoutDataByDate[today].treadmill;
-         tspeed.value = data.s || 3.5;
-         tgrade.value = data.g || 7.5;
-         tdur.value = data.m || 30;
-         previewTreadmill();
+       if (waterLevelDataByDate[today] && waterLevelDataByDate[today].waterLevel) {
+         const data = waterLevelDataByDate[today].waterLevel;
+         waterLocation.value = data.location || '';
+         customLocationName.value = data.customLocation || '';
+         waterLevel.value = data.level || '';
+         waterDate.value = data.date || today;
+         previewWaterLevel();
        } else {
          // Set default values if no saved data
-         tspeed.value = 3.5;
-         tgrade.value = 7.5;
-         tdur.value = 30;
-         previewTreadmill();
+         waterLocation.value = '';
+         customLocationName.value = '';
+         waterLevel.value = '';
+         waterDate.value = today;
+         previewWaterLevel();
        }
      }
 
-     function loadTreadmillChart() {
-       // Clear existing chart data
-       tchart.data.labels = [];
-       tchart.data.datasets[0].data = [];
-       
-       // Load treadmill data from Firebase - shows cumulative daily totals
-       const dates = Object.keys(workoutDataByDate).sort();
-       dates.forEach(date => {
-         if (workoutDataByDate[date].treadmill && workoutDataByDate[date].treadmill.calories) {
-           tchart.data.labels.push(date);
-           tchart.data.datasets[0].data.push(workoutDataByDate[date].treadmill.calories);
-         }
-       });
-       tchart.update();
+     function loadWaterLevelChart() {
+       // This function is now handled by updateCharts() which includes the new multi-dataset structure
+       // Just call updateCharts to ensure the chart is properly loaded
+       updateCharts();
      }
 
-     function loadStairsChart() {
+     function loadWaterLevelHistoryChart() {
        // Clear existing chart data
-       schart.data.labels = [];
-       schart.data.datasets[0].data = [];
+       const historyChart = document.getElementById('waterHistoryChart');
+       if (!historyChart) return;
        
-       // Load stairs data from Firebase - shows cumulative daily totals
-       const dates = Object.keys(workoutDataByDate).sort();
+       const hctx = historyChart.getContext('2d');
+       const hchart = new Chart(hctx, {
+         type: 'line',
+         data: {labels: [], datasets: [{label: 'Water Level (ft)', data: [], borderColor: '#3b82f6', fill: false, tension: 0.25, pointRadius: 6, pointHoverRadius: 9}]},
+         options: {scales: {y: {beginAtZero: true}}}
+       });
+       
+       // Load water level data from Firebase - shows daily averages
+       const dates = Object.keys(waterLevelDataByDate).sort();
        dates.forEach(date => {
-         if (workoutDataByDate[date].stairs && workoutDataByDate[date].stairs.calories) {
-           schart.data.labels.push(date);
-           schart.data.datasets[0].data.push(workoutDataByDate[date].stairs.calories);
+         const dayData = waterLevelDataByDate[date];
+         if (dayData) {
+           let totalLevel = 0;
+           let count = 0;
+           Object.keys(dayData).forEach(location => {
+             if (dayData[location] && dayData[location].level) {
+               totalLevel += dayData[location].level;
+               count++;
+             }
+           });
+           if (count > 0) {
+             hchart.data.labels.push(date);
+             hchart.data.datasets[0].data.push(totalLevel / count);
+           }
          }
        });
-       schart.update();
+       hchart.update();
      }
-    function previewTreadmill(){
-      const {w,s,g,m}=treadmillInputs();
-      if(w>0 && s>0 && g>=0 && m>0){
-        const total=calcTreadmillKcal(w,s,g,m);
-        tresult.innerHTML=`<div class='math'>Preview ≈ ${Math.round(total)} kcal</div>`;
+    function previewWaterLevel(){
+      const {location, customLocation, level, date} = waterLevelInputs();
+      if(location && level > 0 && date){
+        const locationName = location === 'custom' ? customLocation : location;
+        waterResult.innerHTML=`<div class='math'>Preview: ${locationName} - ${level} ft on ${date}</div>`;
       } else {
-        tresult.innerHTML='';
+        waterResult.innerHTML='';
       }
     }
-         function renderTreadmill(lbs,mph,gradePct,minutes){
-       const total=calcTreadmillKcal(lbs,mph,gradePct,minutes);
-       tresult.innerHTML=`<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       addActivityForToday(total);
+         function renderWaterLevel(location, customLocation, level, date){
+       const locationName = location === 'custom' ? customLocation : location;
+       waterResult.innerHTML=`<div class='math'>Logged: ${locationName} - ${level} ft on ${date}</div>`;
        
-       // Save workout data to Firebase for graphs
-       const today=todayStr();
-       if (!workoutDataByDate[today]) {
-         workoutDataByDate[today] = {};
+       // If it's a custom location, add it to the custom locations list
+       if (location === 'custom' && customLocation && !customLocations.includes(customLocation)) {
+         customLocations.push(customLocation);
+         updateLocationDropdowns();
        }
        
-       // If there's already treadmill data for today, add to it instead of replacing
-       if (workoutDataByDate[today].treadmill) {
-         workoutDataByDate[today].treadmill.calories += Math.round(total);
-         // Update the individual workout data as well
-         if (!workoutDataByDate[today].treadmill.workouts) {
-           workoutDataByDate[today].treadmill.workouts = [];
-         }
-         workoutDataByDate[today].treadmill.workouts.push({
-           w: lbs, s: mph, g: gradePct, m: minutes,
-           calories: Math.round(total)
-         });
-       } else {
-         workoutDataByDate[today].treadmill = {
-           w: lbs, s: mph, g: gradePct, m: minutes,
-           calories: Math.round(total),
-           workouts: [{
-             w: lbs, s: mph, g: gradePct, m: minutes,
-             calories: Math.round(total)
-           }]
-         };
+       // Save water level data to Firebase for graphs
+       if (!waterLevelDataByDate[date]) {
+         waterLevelDataByDate[date] = {};
        }
+       
+       // Store water level data by location
+       waterLevelDataByDate[date][location] = {
+         level: level,
+         locationName: locationName,
+         timestamp: new Date().toISOString()
+       };
        
        saveUserData();
        
-       // Update treadmill chart with cumulative total
-       loadTreadmillChart();
+       // Update water level chart
+       loadWaterLevelChart();
        
-       // Update overall workout chart
+       // Update overall water level chart
        updateCharts();
        
        // Update streaks
        calculateStreaks();
        updateStreakDisplay();
        
-       // Hide swipe hint if this is the user's first workout
+       // Hide swipe hint if this is the user's first water level entry
        checkAndHideSwipeHint();
      }
          ['input','change'].forEach(evt=>{
-       tspeed.addEventListener(evt,()=>{
-         previewTreadmill();
-         saveTreadmillInputs();
+       waterLocation.addEventListener(evt,()=>{
+         const isCustom = waterLocation.value === 'custom';
+         document.getElementById('customLocationField').classList.toggle('hidden', !isCustom);
+         previewWaterLevel();
+         saveWaterLevelInputs();
        });
-       tgrade.addEventListener(evt,()=>{
-         previewTreadmill();
-         saveTreadmillInputs();
+       customLocationName.addEventListener(evt,()=>{
+         previewWaterLevel();
+         saveWaterLevelInputs();
        });
-       tdur.addEventListener(evt,()=>{
-         previewTreadmill();
-         saveTreadmillInputs();
+       waterLevel.addEventListener(evt,()=>{
+         previewWaterLevel();
+         saveWaterLevelInputs();
+       });
+       waterDate.addEventListener(evt,()=>{
+         previewWaterLevel();
+         saveWaterLevelInputs();
        });
      });
-         tcalc.addEventListener('click',()=>{
-       const {w,s,g,m}=treadmillInputs();
-       if(!w||!s||!g||!m){tresult.innerHTML='<p>Please enter all values</p>';return;}
-       renderTreadmill(w,s,g,m);
+         waterCalc.addEventListener('click',()=>{
+       const {location, customLocation, level, date} = waterLevelInputs();
+       if(!location || !level || !date){waterResult.innerHTML='<p>Please enter all values</p>';return;}
+       if(location === 'custom' && !customLocation){waterResult.innerHTML='<p>Please enter custom location name</p>';return;}
+       renderWaterLevel(location, customLocation, level, date);
      });
 
-    // ===== Stairs =====
-    let sctx=document.getElementById('schart').getContext('2d');
-    let schart=new Chart(sctx,{type:'line',data:{labels:[],datasets:[{label:'Calories Burned',data:[],borderColor:'#6ee7b7',fill:false,tension:0.25,pointRadius:6,pointHoverRadius:9}]},options:{scales:{y:{beginAtZero:true}}}});
-
-    sintensity.addEventListener('change',()=>{
-      const isCustom = sintensity.value==='custom';
-      document.getElementById('customMetField').classList.toggle('hidden', !isCustom);
-    });
-         function renderStairs(lbs, minutes, met){
-       const total=calcStairKcal(lbs, minutes, met);
-       sresult.innerHTML=`<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
-       addActivityForToday(total);
-       
-       // Save workout data to Firebase for graphs
-       const today=todayStr();
-       if (!workoutDataByDate[today]) {
-         workoutDataByDate[today] = {};
-       }
-       
-       // If there's already stairs data for today, add to it instead of replacing
-       if (workoutDataByDate[today].stairs) {
-         workoutDataByDate[today].stairs.calories += Math.round(total);
-         // Update the individual workout data as well
-         if (!workoutDataByDate[today].stairs.workouts) {
-           workoutDataByDate[today].stairs.workouts = [];
-         }
-         workoutDataByDate[today].stairs.workouts.push({
-           w: lbs, m: minutes, met: met,
-           calories: Math.round(total)
-         });
-       } else {
-         workoutDataByDate[today].stairs = {
-           w: lbs, m: minutes, met: met,
-           calories: Math.round(total),
-           workouts: [{
-             w: lbs, m: minutes, met: met,
-             calories: Math.round(total)
-           }]
-         };
-       }
-       
-       saveUserData();
-       
-       // Update stairs chart with cumulative total
-       loadStairsChart();
-       
-       // Update overall workout chart
-       updateCharts();
-       
-       // Update streaks
-       calculateStreaks();
-       updateStreakDisplay();
-       
-       // Hide swipe hint if this is the user's first workout
-       checkAndHideSwipeHint();
-     }
-         scalc.addEventListener('click',()=>{
-       const w=userProfile?.weight||170, m=+sdur.value;
-       let met = sintensity.value==='custom' ? +scustom.value : +sintensity.value;
-       if(!w||!m||!met){sresult.innerHTML='<p>Please enter all values</p>';return;}
-       renderStairs(w, m, met);
-     });
+    // ===== Water Level History =====
+    // Chart initialization moved to loadWaterLevelHistoryChart function
+    // Old renderStairs function removed - replaced with water level functionality
+    // Old scalc event listener removed - replaced with water level functionality
 
     // ===== Workouts Menu Show/Hide =====
     const workoutMenu=document.getElementById('workoutMenu');
-    const showBtn=document.getElementById('showWorkouts');
-    const toggleSection=document.getElementById('workoutToggleSection');
+    const showBtn=document.getElementById('showWaterLevels');
+    const toggleSection=document.getElementById('waterLevelToggleSection');
 
     function setShowBtnVisible(vis){ toggleSection.style.display = vis ? '' : 'none'; }
     function setMenuVisible(vis){ workoutMenu.classList.toggle('hidden', !vis); }
@@ -3642,43 +5107,100 @@
          showBtn.addEventListener('click',()=>{
        const willShow = workoutMenu.classList.contains('hidden');
        setMenuVisible(willShow);
-       showBtn.textContent = willShow ? 'Hide Workouts' : 'Show Workouts';
-       // Hide the toggle button when workouts are shown
+       showBtn.textContent = willShow ? 'Hide Water Levels' : 'Show Water Levels';
+       // Hide the toggle button when water levels are shown
        setShowBtnVisible(!willShow);
      });
 
          document.getElementById('hideWorkouts').addEventListener('click',()=>{
        setMenuVisible(false);
-       showBtn.textContent = 'Show Workouts';
-       // Show the toggle button when workouts are hidden
+       showBtn.textContent = 'Show Water Levels';
+       // Show the toggle button when water levels are hidden
        setShowBtnVisible(true);
      });
 
          document.getElementById('openTreadmill').addEventListener('click',()=>{
        setMenuVisible(false);
-       document.getElementById('treadmillSection').classList.remove('hidden');
+       document.getElementById('waterLevelSection').classList.remove('hidden');
        setShowBtnVisible(false);
-       loadTreadmillInputs();
-       loadTreadmillChart();
+       loadWaterLevelInputs();
+       loadWaterLevelChart();
      });
          document.getElementById('openStairs').addEventListener('click',()=>{
        setMenuVisible(false);
-       document.getElementById('stairSection').classList.remove('hidden');
+       document.getElementById('waterHistorySection').classList.remove('hidden');
        setShowBtnVisible(false);
-       loadStairsChart();
+       loadWaterLevelHistoryChart();
      });
-         document.getElementById('backFromTreadmill').addEventListener('click',()=>{
-       document.getElementById('treadmillSection').classList.add('hidden');
+         document.getElementById('backFromWater').addEventListener('click',()=>{
+       document.getElementById('waterLevelSection').classList.add('hidden');
        setMenuVisible(true);
        setShowBtnVisible(false);
-       showBtn.textContent='Hide Workouts';
+       showBtn.textContent='Hide Water Levels';
      });
-     document.getElementById('backFromStairs').addEventListener('click',()=>{
-       document.getElementById('stairSection').classList.add('hidden');
+     document.getElementById('backFromWaterHistory').addEventListener('click',()=>{
+       document.getElementById('waterHistorySection').classList.add('hidden');
        setMenuVisible(true);
        setShowBtnVisible(false);
-       showBtn.textContent='Hide Workouts';
+       showBtn.textContent='Hide Water Levels';
      });
+
+         // ===== Full Year Chart Update =====
+     function updateChartsFullYear() {
+       const labels = getAllDates();
+       
+       // Group by location for full year visualization
+       const locationData = {};
+       const allLocations = new Set();
+       
+       labels.forEach(date => {
+         const dayData = waterLevelDataByDate[date];
+         if (dayData) {
+           Object.keys(dayData).forEach(location => {
+             if (dayData[location] && dayData[location].level) {
+               allLocations.add(location);
+               if (!locationData[location]) {
+                 locationData[location] = [];
+               }
+               locationData[location].push({
+                 date: date,
+                 level: dayData[location].level,
+                 locationName: dayData[location].locationName
+               });
+             }
+           });
+         }
+       });
+       
+       // Create datasets for each location
+       const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
+       const datasets = Array.from(allLocations).map((location, index) => {
+         const locationPoints = locationData[location] || [];
+         const dataPoints = labels.map(date => {
+           const point = locationPoints.find(p => p.date === date);
+           return point ? point.level : null;
+         });
+         
+         return {
+           label: locationData[location]?.[0]?.locationName || location,
+           data: dataPoints,
+           borderColor: colors[index % colors.length],
+           backgroundColor: colors[index % colors.length] + '20',
+           fill: false,
+           tension: 0.25,
+           pointRadius: 3,
+           pointHoverRadius: 5
+         };
+       });
+
+       waterLevelChart.data.labels = labels;
+       waterLevelChart.data.datasets = datasets;
+       waterLevelChart.update();
+
+       mobileWaterLevelChart.data.labels = labels;
+       mobileWaterLevelChart.data.datasets = datasets;
+       mobileWaterLevelChart.update();
+     }
 
          // ===== Show More Toggle =====
      document.getElementById('toggleFat').addEventListener('click',()=>{
@@ -3758,16 +5280,27 @@
        updateCharts();
      });
 
-     document.getElementById('mobileToggleWeightFat').addEventListener('click',()=>{
-       const isFat=mobileWeightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileWeightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
-       updateCharts();
-     });
+     // document.getElementById('mobileToggleWeightFat').addEventListener('click',()=>{ // Removed - weight module replaced
+     //   const isFat=mobileWeightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+     //   mobileWeightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+     //   updateCharts();
+     // });
 
-     document.getElementById('mobileToggleWorkoutFat').addEventListener('click',()=>{
-       const isFat=mobileWorkoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       mobileWorkoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+     document.getElementById('mobileToggleWaterLevelLocation').addEventListener('click',()=>{
+       const button = document.getElementById('mobileToggleWaterLevelLocation');
+       const isShowingMore = button.textContent === 'Show Less';
+       
+       if (isShowingMore) {
+         // Switch back to 2 months view
+         button.textContent = 'Show More';
+         // Update chart to show 2 months
        updateCharts();
+       } else {
+         // Switch to full year view
+         button.textContent = 'Show Less';
+         // Update chart to show full year
+         updateChartsFullYear();
+       }
      });
 
      document.getElementById('mobileToggleFoodDetail').addEventListener('click',()=>{
@@ -3824,39 +5357,40 @@
        updateCharts();
      });
 
-     document.getElementById('toggleWorkoutFat').addEventListener('click',()=>{
-       const isFat=workoutChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       workoutChart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
+     document.getElementById('toggleWaterLevelLocation').addEventListener('click',()=>{
+       const button = document.getElementById('toggleWaterLevelLocation');
+       const isShowingMore = button.textContent === 'Show Less';
+       
+       if (isShowingMore) {
+         // Switch back to 2 months view
+         button.textContent = 'Show More';
+         // Update chart to show 2 months
        updateCharts();
+       } else {
+         // Switch to full year view
+         button.textContent = 'Show Less';
+         // Update chart to show full year
+         updateChartsFullYear();
+       }
      });
 
-     document.getElementById('toggleWeightFat').addEventListener('click',()=>{
-       const isFat=weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       weightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
-       updateCharts();
-     });
+     // document.getElementById('toggleWeightFat').addEventListener('click',()=>{ // Removed - weight module replaced
+     //   const isFat=weightChart.options.scales.y.title?.text==='Fat Loss (lbs)';
+     //   weightChart.options.scales.y.title={display:true,text: isFat ? 'Weight (lbs)' : 'Fat Loss (lbs)'};
+     //   updateCharts();
+     // });
 
-     document.getElementById('toggleTreadmillFat').addEventListener('click',()=>{
-       const isFat=tchart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       tchart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
-       tchart.update();
-     });
-
-     document.getElementById('toggleStairsFat').addEventListener('click',()=>{
-       const isFat=schart.options.scales.y.title?.text==='Fat Loss (lbs)';
-       schart.options.scales.y.title={display:true,text: isFat ? 'Calories' : 'Fat Loss (lbs)'};
-       schart.update();
-     });
+    // Old toggle event listeners removed - replaced with water level functionality
 
          // ===== Manual Add Calories =====
      document.getElementById('addCaloriesBtn').addEventListener('click', showAddCaloriesModal);
      
      // Mobile button event listeners
      document.getElementById('mobileAddCaloriesBtn').addEventListener('click', showAddCaloriesModal);
-     document.getElementById('mobileAddWeightBtn').addEventListener('click', showAddWeightModal);
-     document.getElementById('mobileShowWorkouts').addEventListener('click', () => {
-       // Show mobile workout menu modal
-       showMobileWorkoutMenu();
+     // document.getElementById('mobileAddWeightBtn').addEventListener('click', showAddWeightModal); // Removed - weight module replaced
+     document.getElementById('mobileShowWaterLevels').addEventListener('click', () => {
+       // Show mobile water level menu modal
+       showMobileWaterLevelMenu();
      });
      document.getElementById('mobileShowFoods').addEventListener('click', () => {
        // Show mobile food menu modal
@@ -3879,15 +5413,15 @@
        auth.signOut();
      });
      
-     // Mobile workout menu event listeners
-     document.getElementById('closeMobileWorkoutMenu').addEventListener('click', hideMobileWorkoutMenu);
+     // Mobile water level menu event listeners
+     document.getElementById('closeMobileWaterLevelMenu').addEventListener('click', hideMobileWaterLevelMenu);
      document.getElementById('mobileOpenTreadmill').addEventListener('click', () => {
-       hideMobileWorkoutMenu();
-       showMobileTreadmillModal();
+       hideMobileWaterLevelMenu();
+       showMobileWaterLevelModal();
      });
      document.getElementById('mobileOpenStairs').addEventListener('click', () => {
-       hideMobileWorkoutMenu();
-       showMobileStairsModal();
+       hideMobileWaterLevelMenu();
+       showMobileWaterHistoryModal();
      });
      
      // Mobile food menu event listeners
@@ -3897,137 +5431,90 @@
        showMobileCustomFoodModal();
      });
      
-     // Mobile treadmill event listeners
-     document.getElementById('closeMobileTreadmill').addEventListener('click', hideMobileTreadmillModal);
-     document.getElementById('mobileTcalc').addEventListener('click', () => {
-       const w = userProfile?.weight || 170;
-       const s = +document.getElementById('mobileTspeed').value;
-       const g = +document.getElementById('mobileTgrade').value;
-       const m = +document.getElementById('mobileTdur').value;
-       
-       if (!w || !s || !g || !m) {
-         document.getElementById('mobileTresult').innerHTML = '<p>Please enter all values</p>';
-         return;
-       }
-       
-       const total = calcTreadmillKcal(w, s, g, m);
-       document.getElementById('mobileTresult').innerHTML = `<div class='math'>Logged ≈ ${Math.round(total)} kcal</div>`;
-       addActivityForToday(total);
-       
-       // Save workout data to Firebase for graphs
-       const today = todayStr();
-       if (!workoutDataByDate[today]) {
-         workoutDataByDate[today] = {};
-       }
-       
-       // If there's already treadmill data for today, add to it instead of replacing
-       if (workoutDataByDate[today].treadmill) {
-         workoutDataByDate[today].treadmill.calories += Math.round(total);
-         // Update the individual workout data as well
-         if (!workoutDataByDate[today].treadmill.workouts) {
-           workoutDataByDate[today].treadmill.workouts = [];
-         }
-         workoutDataByDate[today].treadmill.workouts.push({
-           w: w, s: s, g: g, m: m,
-           calories: Math.round(total)
-         });
-       } else {
-         workoutDataByDate[today].treadmill = {
-           w: w, s: s, g: g, m: m,
-           calories: Math.round(total),
-           workouts: [{
-             w: w, s: s, g: g, m: m,
-             calories: Math.round(total)
-           }]
-         };
-       }
-       saveUserData();
-       
-       // Update charts
-       updateCharts();
-       
-       // Update streaks
-       calculateStreaks();
-       updateStreakDisplay();
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideMobileTreadmillModal();
-       }, 2000);
+     // Mobile water level event listeners
+     document.getElementById('closeMobileWaterLevel').addEventListener('click', hideMobileWaterLevelModal);
+     
+     // Mobile water level input event listeners
+     document.getElementById('mobileWaterLocation').addEventListener('change', () => {
+       const isCustom = document.getElementById('mobileWaterLocation').value === 'custom';
+       document.getElementById('mobileCustomLocationField').classList.toggle('hidden', !isCustom);
+       previewMobileWaterLevel();
      });
      
-     // Mobile stairs event listeners
-     document.getElementById('closeMobileStairs').addEventListener('click', hideMobileStairsModal);
-     document.getElementById('mobileScalc').addEventListener('click', () => {
-       const w = userProfile?.weight || 170;
-       const m = +document.getElementById('mobileSdur').value;
-       let met = document.getElementById('mobileSintensity').value === 'custom' ? 
-         +document.getElementById('mobileScustom').value : 
-         +document.getElementById('mobileSintensity').value;
-       
-       if (!w || !m || !met) {
-         document.getElementById('mobileSresult').innerHTML = '<p>Please enter all values</p>';
-         return;
-       }
-       
-       const total = calcStairKcal(w, m, met);
-       document.getElementById('mobileSresult').innerHTML = `<div class='math'>≈ ${Math.round(total)} kcal burned</div>`;
-       addActivityForToday(total);
-       
-       // Save workout data to Firebase for graphs
-       const today = todayStr();
-       if (!workoutDataByDate[today]) {
-         workoutDataByDate[today] = {};
-       }
-       
-       // If there's already stairs data for today, add to it instead of replacing
-       if (workoutDataByDate[today].stairs) {
-         workoutDataByDate[today].stairs.calories += Math.round(total);
-         // Update the individual workout data as well
-         if (!workoutDataByDate[today].stairs.workouts) {
-           workoutDataByDate[today].stairs.workouts = [];
-         }
-         workoutDataByDate[today].stairs.workouts.push({
-           w: w, m: m, met: met,
-           calories: Math.round(total)
-         });
-       } else {
-         workoutDataByDate[today].stairs = {
-           w: w, m: m, met: met,
-           calories: Math.round(total),
-           workouts: [{
-             w: w, m: m, met: met,
-             calories: Math.round(total)
-           }]
-         };
-       }
-       saveUserData();
-       
-       // Update charts
-       updateCharts();
-       
-       // Update streaks
-       calculateStreaks();
-       updateStreakDisplay();
-       
-       // Close modal after a short delay
-       setTimeout(() => {
-         hideMobileStairsModal();
-       }, 2000);
-     });
-     
-     // Mobile treadmill input event listeners
      ['input', 'change'].forEach(evt => {
-       document.getElementById('mobileTspeed').addEventListener(evt, previewMobileTreadmill);
-       document.getElementById('mobileTgrade').addEventListener(evt, previewMobileTreadmill);
-       document.getElementById('mobileTdur').addEventListener(evt, previewMobileTreadmill);
+       document.getElementById('mobileCustomLocationName').addEventListener(evt, previewMobileWaterLevel);
+       document.getElementById('mobileWaterLevel').addEventListener(evt, previewMobileWaterLevel);
+       document.getElementById('mobileWaterDate').addEventListener(evt, previewMobileWaterLevel);
+     });
+     document.getElementById('mobileWaterCalc').addEventListener('click', () => {
+       const location = document.getElementById('mobileWaterLocation').value;
+       const customLocation = document.getElementById('mobileCustomLocationName').value;
+       const level = +document.getElementById('mobileWaterLevel').value;
+       const date = document.getElementById('mobileWaterDate').value;
+       
+       if (!location || !level || !date) {
+         document.getElementById('mobileWaterResult').innerHTML = '<p>Please enter all values</p>';
+         return;
+       }
+       
+       if (location === 'custom' && !customLocation) {
+         document.getElementById('mobileWaterResult').innerHTML = '<p>Please enter custom location name</p>';
+         return;
+       }
+       
+       // If it's a custom location, add it to the custom locations list
+       if (location === 'custom' && customLocation && !customLocations.includes(customLocation)) {
+         customLocations.push(customLocation);
+         updateLocationDropdowns();
+       }
+       
+       // Save water level data to Firebase
+       if (!waterLevelDataByDate[date]) {
+         waterLevelDataByDate[date] = {};
+       }
+       
+       const locationName = location === 'custom' ? customLocation : location;
+       waterLevelDataByDate[date][location] = {
+         level: level,
+         locationName: locationName,
+         timestamp: new Date().toISOString()
+       };
+       
+       saveUserData();
+       
+       // Update water level chart
+       loadWaterLevelChart();
+       
+       // Update overall water level chart
+       updateCharts();
+       
+       // Update streak data
+       calculateStreaks();
+       updateStreakDisplay();
+       
+       // Hide swipe hint if user has logged any water levels
+       checkAndHideSwipeHint();
+       
+       // Show success message
+       document.getElementById('mobileWaterResult').innerHTML = `<div class='math'>Logged: ${locationName} - ${level} ft on ${date}</div>`;
+       
+       // Auto-close modal after 2 seconds
+       setTimeout(() => {
+         hideMobileWaterLevelModal();
+       }, 2000);
      });
      
-     // Mobile stairs intensity change listener
-     document.getElementById('mobileSintensity').addEventListener('change', () => {
-       const isCustom = document.getElementById('mobileSintensity').value === 'custom';
-       document.getElementById('mobileCustomMetField').classList.toggle('hidden', !isCustom);
-     });
+     // Mobile water history event listeners
+     document.getElementById('closeMobileWaterHistory').addEventListener('click', hideMobileWaterHistoryModal);
+     document.getElementById('exportWaterHistoryBtn').addEventListener('click', exportWaterLevelDataToExcel);
+     document.getElementById('mobileHistoryLocation').addEventListener('change', loadMobileWaterLevelHistory);
+     document.getElementById('mobileHistoryDateRange').addEventListener('change', loadMobileWaterLevelHistory);
+     
+    // Old mobile stairs event listener removed - replaced with water level functionality
+     
+    // Old mobile treadmill event listeners removed - replaced with water level functionality
+     
+    // Old mobile stairs intensity change listener removed - replaced with water level functionality
      
 
      
@@ -4203,8 +5690,52 @@
        document.getElementById('setupHeightIn').value=9;
        document.getElementById('setupWeight').value=170;
        
-       // Prefill treadmill preview with defaults
-       tspeed.value=3.5; tgrade.value=7.5; tdur.value=30; previewTreadmill();
+       // Prefill water level form with defaults
+       waterLocation.value=''; waterLevel.value=''; waterDate.value=todayStr(); previewWaterLevel();
+       
+       // Locations management event listeners
+       document.getElementById('manageLocations').addEventListener('click', showLocationsModal);
+       document.getElementById('mobileManageLocations').addEventListener('click', function() {
+         console.log('Mobile manage locations button clicked');
+         showLocationsModal();
+       });
+       document.getElementById('closeLocationsModal').addEventListener('click', hideLocationsModal);
+       document.getElementById('addLocationBtn').addEventListener('click', addLocation);
+       document.getElementById('newLocationName').addEventListener('keypress', function(e) {
+         if (e.key === 'Enter') {
+           addLocation();
+         }
+       });
+       
+       // Meter reads event listeners
+       document.getElementById('showMeterReads').addEventListener('click', showMeterReadsMenu);
+       document.getElementById('mobileShowMeterReads').addEventListener('click', showMeterReadsMenu);
+       // closeMeterReadsMenu, openMeterReadsEntry, openMeterReadsHistory are created dynamically
+       // closeMeterReads, meterReadsCalc, manageMeterReadsLocations are created dynamically
+       // closeMeterReadsHistory, exportMeterReadsHistoryBtn, meterReadsHistoryLocation, meterReadsHistoryDateRange are created dynamically
+       document.getElementById('toggleMeterReadsLocation').addEventListener('click', function() {
+         const button = document.getElementById('toggleMeterReadsLocation');
+         if (button.textContent === 'Show More') {
+           updateMeterReadsChartsFullYear();
+           button.textContent = 'Show Less';
+         } else {
+           updateMeterReadsCharts();
+           button.textContent = 'Show More';
+         }
+       });
+       document.getElementById('mobileToggleMeterReadsLocation').addEventListener('click', function() {
+         const button = document.getElementById('mobileToggleMeterReadsLocation');
+         if (button.textContent === 'Show More') {
+           updateMeterReadsChartsFullYear();
+           button.textContent = 'Show Less';
+         } else {
+           updateMeterReadsCharts();
+           button.textContent = 'Show More';
+         }
+       });
+       
+       // Meter reads input change listeners are added dynamically when modal is created
+       
        
                 // Initialize mobile swipe functionality
        initMobileSwipe();
