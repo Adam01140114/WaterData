@@ -793,6 +793,11 @@
            <button class="ghost" id="mobileToggleMeterReadsLocation">Show More</button>
            <button class="primary" id="mobileShowMeterReads">Add Meter Read</button>
            
+           <h2>Residual Readings (ft)</h2>
+           <canvas id="mobileResidualReadingsChart" height="200"></canvas>
+           <button class="ghost" id="mobileToggleResidualReadingsLocation">Show More</button>
+           <button class="primary" id="mobileShowResidualReadings">Add Residual Reading</button>
+           
          </div>
        </div>
 
@@ -1399,6 +1404,13 @@
          <button class="primary" id="showMeterReads">Add Meter Read</button>
        </section>
 
+       <section class="card">
+         <h2>Residual Readings (ft)</h2>
+         <canvas id="residualReadingsChart" height="200"></canvas>
+         <button class="ghost" id="toggleResidualReadingsLocation">Show More</button>
+         <button class="primary" id="showResidualReadings">Add Residual Reading</button>
+       </section>
+
       <!-- Workouts Menu (hidden by default) -->
       <section class="card hidden" id="workoutMenu">
         <h2>Choose Water Level Action</h2>
@@ -1523,6 +1535,8 @@
     let customLocations = []; // user's custom water level locations
     let meterReadsDataByDate={}; // date -> meter reads data for that date
     let customMeterReadsLocations = []; // user's custom meter reads locations
+    let residualReadingsDataByDate={}; // date -> residual readings data for that date
+    let customResidualReadingsLocations = []; // user's custom residual readings locations
     let foodDataByDate={};  // date -> food data for that date
     let customFoods={};     // custom food name -> {name, calories, icon}
     let weightLoggingClosed={}; // date -> whether weight logging was closed for that date
@@ -2006,8 +2020,10 @@
            weightByDate = data.weightByDate || {};
            waterLevelDataByDate = data.waterLevelDataByDate || {};
            customLocations = data.customLocations || [];
-           meterReadsDataByDate = data.meterReadsDataByDate || {};
-           customMeterReadsLocations = data.customMeterReadsLocations || [];
+        meterReadsDataByDate = data.meterReadsDataByDate || {};
+        customMeterReadsLocations = data.customMeterReadsLocations || [];
+        residualReadingsDataByDate = data.residualReadingsDataByDate || {};
+        customResidualReadingsLocations = data.customResidualReadingsLocations || [];
            foodDataByDate = data.foodDataByDate || {};
            customFoods = data.customFoods || {};
            weightLoggingClosed = data.weightLoggingClosed || {};
@@ -2089,8 +2105,10 @@
            weightByDate,
            waterLevelDataByDate,
            customLocations,
-           meterReadsDataByDate,
-           customMeterReadsLocations,
+        meterReadsDataByDate,
+        customMeterReadsLocations,
+        residualReadingsDataByDate,
+        customResidualReadingsLocations,
            foodDataByDate,
            customFoods,
            weightLoggingClosed,
