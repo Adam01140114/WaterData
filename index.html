@@ -6661,15 +6661,9 @@ Date         | Location | Residual Reading (ft) | Timestamp
            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
            const datasets = Array.from(allLocations).map((location, index) => {
              const locationPoints = locationData[location] || [];
-             
-             // Create data points with actual values only
-             const dataPoints = [];
-             
-             filteredLabels.forEach(date => {
+             const dataPoints = filteredLabels.map(date => {
                const point = locationPoints.find(p => p.date === date);
-               if (point) {
-                 dataPoints.push(point.level);
-               }
+               return point ? point.level : undefined;
              });
              
              return {
@@ -6680,7 +6674,8 @@ Date         | Location | Residual Reading (ft) | Timestamp
                fill: false,
                tension: 0.25,
                pointRadius: 6,
-               pointHoverRadius: 9
+               pointHoverRadius: 9,
+               spanGaps: true
              };
            });
 
@@ -6946,9 +6941,15 @@ Date         | Location | Residual Reading (ft) | Timestamp
        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
        const datasets = Array.from(allLocations).map((location, index) => {
          const locationPoints = locationData[location] || [];
-         const dataPoints = labels.map(date => {
+         
+         // Create data points with actual values only
+         const dataPoints = [];
+         
+         labels.forEach(date => {
            const point = locationPoints.find(p => p.date === date);
-           return point ? point.level : null;
+           if (point) {
+             dataPoints.push(point.level);
+           }
          });
          
          return {
@@ -6958,8 +6959,8 @@ Date         | Location | Residual Reading (ft) | Timestamp
            backgroundColor: colors[index % colors.length] + '20',
            fill: false,
            tension: 0.25,
-           pointRadius: 3,
-           pointHoverRadius: 5
+           pointRadius: 6,
+           pointHoverRadius: 9
          };
        });
 
