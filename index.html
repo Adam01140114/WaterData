@@ -3772,7 +3772,9 @@ Date         | Location | Water Level (ft) | Timestamp
                  data: [],
                  borderColor: getLocationColor(Object.keys(locationData).length),
                  backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
-                 tension: 0.1
+                 tension: 0.25,
+                 pointRadius: 6,
+                 pointHoverRadius: 9
                };
              }
              locationData[locationName].data.push(dayData[locationName].value);
@@ -3847,7 +3849,9 @@ Date         | Location | Water Level (ft) | Timestamp
                  data: [],
                  borderColor: getLocationColor(Object.keys(locationData).length),
                  backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
-                 tension: 0.1
+                 tension: 0.25,
+                 pointRadius: 6,
+                 pointHoverRadius: 9
                };
              }
              locationData[locationName].data.push(dayData[locationName].value);
@@ -5096,7 +5100,9 @@ Date         | Location | Meter Read (ft) | Timestamp
                      data: [],
                      borderColor: getLocationColor(Object.keys(locationData).length),
                      backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
-                     tension: 0.1
+                     tension: 0.25,
+                 pointRadius: 6,
+                 pointHoverRadius: 9
                    };
                  }
                  locationData[locationName].data.push(dayData[locationName].value);
@@ -5176,7 +5182,9 @@ Date         | Location | Meter Read (ft) | Timestamp
                      data: [],
                      borderColor: getLocationColor(Object.keys(locationData).length),
                      backgroundColor: getLocationColor(Object.keys(locationData).length, 0.1),
-                     tension: 0.1
+                     tension: 0.25,
+                 pointRadius: 6,
+                 pointHoverRadius: 9
                    };
                  }
                  locationData[locationName].data.push(dayData[locationName].value);
@@ -6626,12 +6634,15 @@ Date         | Location | Residual Reading (ft) | Timestamp
            mobileTotalChart.update();
 
            // ----- Water Level charts -----
+           // Get only water level dates, sorted
+           const waterLevelDates = Object.keys(waterLevelDataByDate).sort();
+           
            // Filter to last 2 months by default
            const twoMonthsAgo = new Date();
            twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
            const twoMonthsAgoStr = twoMonthsAgo.toISOString().split('T')[0];
            
-           const filteredLabels = labels.filter(date => date >= twoMonthsAgoStr);
+           const filteredLabels = waterLevelDates.filter(date => date >= twoMonthsAgoStr);
            
            // Group by locationName for better visualization
            const locationData = {};
@@ -6911,7 +6922,8 @@ Date         | Location | Residual Reading (ft) | Timestamp
 
          // ===== Full Year Chart Update =====
      function updateChartsFullYear() {
-       const labels = getAllDates();
+       // Get only water level dates, sorted
+       const labels = Object.keys(waterLevelDataByDate).sort();
        
        // Group by locationName for full year visualization
        const locationData = {};
@@ -6941,15 +6953,9 @@ Date         | Location | Residual Reading (ft) | Timestamp
        const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#84cc16', '#f97316'];
        const datasets = Array.from(allLocations).map((location, index) => {
          const locationPoints = locationData[location] || [];
-         
-         // Create data points with actual values only
-         const dataPoints = [];
-         
-         labels.forEach(date => {
+         const dataPoints = labels.map(date => {
            const point = locationPoints.find(p => p.date === date);
-           if (point) {
-             dataPoints.push(point.level);
-           }
+           return point ? point.level : undefined;
          });
          
          return {
@@ -6960,7 +6966,8 @@ Date         | Location | Residual Reading (ft) | Timestamp
            fill: false,
            tension: 0.25,
            pointRadius: 6,
-           pointHoverRadius: 9
+           pointHoverRadius: 9,
+           spanGaps: true
          };
        });
 
