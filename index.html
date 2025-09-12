@@ -30,6 +30,7 @@
     .field{margin-bottom:12px;text-align:left}
     .label{font-size:14px;color:var(--muted);margin-bottom:4px;display:block;text-align:left}
     input, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,.1);background:#0e141b;color:var(--text)}
+    input[type="date"]{box-sizing:border-box;-webkit-appearance:none;-moz-appearance:none;appearance:none}
     button{padding:10px 16px;border-radius:10px;border:none;cursor:pointer;font-weight:600;display:block;margin:8px auto}
     .primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#081018}
     .ghost{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,.2)}
@@ -3434,6 +3435,10 @@ Date         | Location | Water Level (ft) | Timestamp
              border-radius: 6px;
              color: #f9fafb;
              font-size: 14px;
+             box-sizing: border-box;
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             appearance: none;
            " />
          </div>
          
@@ -4931,13 +4936,16 @@ Date         | Location | Meter Read (ft) | Timestamp
                <label style="display: block; color: #d1d5db; font-size: 14px; margin-bottom: 8px;">Date</label>
                <input id="residualReadingsDate" type="date" style="
                  width: 100%;
-                 padding: 12px;
+                 padding: 10px 12px;
                  background: #374151;
                  border: 1px solid #4b5563;
                  border-radius: 6px;
                  color: #f9fafb;
                  font-size: 14px;
                  box-sizing: border-box;
+                 -webkit-appearance: none;
+                 -moz-appearance: none;
+                 appearance: none;
                " />
              </div>
              
